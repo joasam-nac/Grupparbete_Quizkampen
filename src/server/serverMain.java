@@ -16,23 +16,18 @@ public class serverMain {
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(c.getOutputStream()));
             BufferedReader in = new BufferedReader(new InputStreamReader(c.getInputStream()));
 
-            String question = "Kan du se detta meddelande?";
-            String correctAnswer = "ja";
-
-            out.write(question);
+            questionManager quiz = new questionManager(3);
+            out.write("Välj område: " + quiz.getQuestionThemes());
             out.newLine();
             out.flush();
 
-            String answer = in.readLine();
+            String theme = in.readLine();
+            int score = quiz.runQuestionGame(theme, in, out);
 
-            if(answer.equals(correctAnswer)){
-                out.write("Rätt!");
-            } else {
-                out.write("Fel!");
-            }
-
+            out.write("Du fick " + score + " poäng!");
             out.newLine();
             out.flush();
+
         } catch (IOException e) {
             throw new IOException(e);
         }
