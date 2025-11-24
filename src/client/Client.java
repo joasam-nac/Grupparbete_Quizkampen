@@ -7,7 +7,7 @@ public class Client {
     private static final String HOST = "localhost";
     private static final int PORT = 5000;
 
-    public static void main(String[] args) {
+    static void main() {
         try (Socket socket = new Socket(HOST, PORT)) {
             BufferedReader serverInput = new BufferedReader(
                     new InputStreamReader(socket.getInputStream())
