@@ -4,16 +4,14 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
 import client.ClientHandler;
 
 /*
-    Hanterar endast att två klienter paras ihop
+    (Hanterar endast att två klienter paras ihop) och kan finnas i en bestämd session
  */
 
 public class MatchmakeHandler {
@@ -21,6 +19,7 @@ public class MatchmakeHandler {
     // Skapar en kölista som kan spara uppkopplade klienter
     private final BlockingQueue<ClientHandler> waitingClients = new LinkedBlockingQueue<>();
 
+    private final List<Session> activeSessions = new ArrayList<>();
     public MatchmakeHandler(int port) throws IOException {
         server = new ServerSocket(port);
     }
@@ -54,16 +53,15 @@ public class MatchmakeHandler {
                 ClientHandler first = waitingClients.take();
                 ClientHandler second = waitingClients.take();
 
-                //hanterar slumpmässiga motståndare
-                if (random.nextBoolean()){
-                    ClientHandler temp = first;
-                    first = second;
-                    second = temp;
-                }
+                Session session = new Session(first, second);
+                activeSessions.add(session);
 
-                first.send("Spelare 1 hittade en motspelare");
-                second.send("Spelare 2 hittade en motspelare");
+                first.send("Du är spelare 1 i session " + session.getId());
+                second.send("Du är spelare 2 i session " + session.getId());
 
+                System.out.println("Aktiva sessioner " + activeSessions.size());
+
+                session.notifyClients();
                 } catch (Exception ignored){
                     Thread.currentThread().interrupt();
                     return;
@@ -71,7 +69,7 @@ public class MatchmakeHandler {
         }
     }
 
-    public static void main() throws IOException{
+    static void main() throws IOException{
         MatchmakeHandler m = new MatchmakeHandler(5000);
         m.start();
         System.out.println("Kör server på port 5000");
