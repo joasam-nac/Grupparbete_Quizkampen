@@ -68,7 +68,7 @@ public class MatchmakeHandler {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    static void main() throws IOException {
         MatchmakeHandler m = new MatchmakeHandler(5000);
         m.start();
         System.out.println("Kör server på port 5000");
