@@ -1,13 +1,13 @@
-public class Questions {
+public class Question {
 
     private String question;
-    private String[] options;
+    private String[] option;
     private String correctAnswer;
     private Category category;
 
-    public Questions(String question, String[] options, String correctAnswer, Category category) {
+    public Question(String question, String[] option, String correctAnswer, Category category) {
         this.question = question;
-        this.options = options;
+        this.option = option;
         this.correctAnswer = correctAnswer;
         this.category = category;
     }
@@ -16,8 +16,8 @@ public class Questions {
         return question;
     }
 
-    public String[] getOptions() {
-        return options;
+    public String[] getOption() {
+        return option;
     }
 
     public String getCorrectAnswer() {

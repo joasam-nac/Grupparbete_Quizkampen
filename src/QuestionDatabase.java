@@ -7,8 +7,8 @@ import java.util.List;
 
 public class QuestionDatabase {
 
-    public List<Questions> readQuestions(Path path) {
-        List<Questions> questionList = new ArrayList<>();
+    public List<Question> readQuestions(Path path) {
+        List<Question> questionList = new ArrayList<>();
 
         try (BufferedReader br = Files.newBufferedReader(path)) {
             String line;
@@ -27,7 +27,7 @@ public class QuestionDatabase {
                 String correctAnswer = parts[5];
                 Category category = Category.valueOf(parts[6]);
 
-                Questions question = new Questions(questionText, options, correctAnswer, category);
+                Question question = new Question(questionText, options, correctAnswer, category);
                 questionList.add(question);
             }
         } catch (IOException e) {
