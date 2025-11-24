@@ -1,33 +1,27 @@
 package server;
 
+import client.ClientHandler;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import client.ClientHandler;
-
-/*
-    (Hanterar endast att två klienter paras ihop) och kan finnas i en bestämd session
- */
 
 public class MatchmakeHandler {
     private final ServerSocket server;
-    // Skapar en kölista som kan spara uppkopplade klienter
-    private final BlockingQueue<ClientHandler> waitingClients = new LinkedBlockingQueue<>();
-
+    private final BlockingQueue<ClientHandler> waitingClients =
+            new LinkedBlockingQueue<>();
+    private final ThemeValidator validator =
+            new ThemeValidator(Set.of("Tema1", "Tema2", "Tema3", "Tema4"));
     private final List<Session> activeSessions = new ArrayList<>();
+
     public MatchmakeHandler(int port) throws IOException {
         server = new ServerSocket(port);
     }
 
-    /*
-        acceptLoop väntar på nyanslutna klienter, alltså inkommande anslutningar
-    matchmakerLoop väntar på minst två anslutningar och parar ihop de två och två, just nu slumpvist
-     */
     public void start() {
         new Thread(this::acceptLoop).start();
         new Thread(this::matchmakingLoop).start();
@@ -37,39 +31,44 @@ public class MatchmakeHandler {
         while (true) {
             try {
                 Socket socket = server.accept();
-                waitingClients.add(new ClientHandler(socket));
+                ClientHandler clientHandler = new ClientHandler(socket);
+                new Thread(clientHandler).start();
+                waitingClients.add(clientHandler);
             } catch (IOException e) {
-                System.err.println("Fel vid att ta emot klient: " + e.getMessage());
+                System.err.println("Fel vid att ta emot klient: " +
+                        e.getMessage());
                 e.printStackTrace(System.err);
             }
         }
     }
 
     private void matchmakingLoop() {
-        Random random = new Random();
-
         while (true) {
             try {
                 ClientHandler first = waitingClients.take();
                 ClientHandler second = waitingClients.take();
 
-                Session session = new Session(first, second);
+                Session session = new Session(first, second, validator);
+
+                first.setSession(session);
+                second.setSession(session);
+
                 activeSessions.add(session);
 
-                first.send("Du är spelare 1 i session " + session.getId());
-                second.send("Du är spelare 2 i session " + session.getId());
+                System.out.println("Session " + session.getId() +
+                        " startades");
+                System.out.println("Aktiva sessioner " +
+                        activeSessions.size());
 
-                System.out.println("Aktiva sessioner " + activeSessions.size());
-
-                session.notifyClients();
-                } catch (Exception ignored){
-                    Thread.currentThread().interrupt();
-                    return;
+                session.start();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
             }
         }
     }
 
-    static void main() throws IOException{
+    public static void main(String[] args) throws IOException {
         MatchmakeHandler m = new MatchmakeHandler(5000);
         m.start();
         System.out.println("Kör server på port 5000");

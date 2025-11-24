@@ -8,20 +8,59 @@ public class Session {
 
     private final ClientHandler firstClient;
     private final ClientHandler secondClient;
+    private final GameController controller = new GameController();
+    private final GameController.SessionState state =
+            new GameController.SessionState();
 
-    public Session(ClientHandler firstClient, ClientHandler secondClient) {
+    private final ThemeValidator validator;
+
+    public Session(
+            ClientHandler firstClient,
+            ClientHandler secondClient,
+            ThemeValidator validator
+    ) {
         this.id = NEXT_ID++;
         this.firstClient = firstClient;
         this.secondClient = secondClient;
-    }
-
-    public void notifyClients() {
-        String text = "Du är ansluten till en andra spelare i en session";
-        firstClient.send(text);
-        secondClient.send(text);
+        this.validator = validator;
     }
 
     public int getId() {
         return id;
+    }
+
+    public void start() {
+        System.out.println("Session " + id +
+                " startar, det är första klientens tur");
+        firstClient.send(GameMessages.CHOOSE_OPPONENT_THEME);
+    }
+
+    public void handleMessage(ClientHandler sender, String msg) {
+        boolean fromFirst = sender == firstClient;
+        GameAction action = controller.processMessage(
+                state,
+                fromFirst,
+                msg,
+                validator
+        );
+
+        executeAction(action);
+    }
+
+    private void executeAction(GameAction action) {
+        switch (action.type()) {
+            case SEND_TO_FIRST:
+                firstClient.send(action.message());
+                break;
+            case SEND_TO_SECOND:
+                secondClient.send(action.message());
+                break;
+            case GAME_FINISHED:
+                firstClient.send(GameMessages.GAME_OVER);
+                secondClient.send(GameMessages.GAME_OVER);
+                break;
+            default:
+                break;
+        }
     }
 }
