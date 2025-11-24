@@ -12,5 +12,23 @@ public class Questions {
         this.category = category;
     }
 
+    public String getQuestion() {
+        return question;
+    }
 
+    public String[] getOptions() {
+        return options;
+    }
+
+    public String getCorrectAnswer() {
+        return correctAnswer;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public boolean isCorrectAnswer(String answer) {
+        return answer.equalsIgnoreCase(correctAnswer);
+    }
 }
