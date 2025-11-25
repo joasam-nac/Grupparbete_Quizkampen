@@ -38,7 +38,6 @@ public class QuestionDatabase {
                     continue;
                 }
 
-                // Dela upp raden vid semikolon
                 String[] parts = line.split(";");
                 if (parts.length != 7) {
                     System.out.println("Fel format på raden: " + line);
