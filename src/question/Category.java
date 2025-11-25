@@ -1,3 +1,5 @@
+package question;
+
 public enum Category {
     MATEMATIK("Matematik"),
     HISTORIA("Historia"),
