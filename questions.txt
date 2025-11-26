@@ -1,0 +1,12 @@
+Vad är 2+2?;3;4;5;6;4;MATEMATIK
+Vilket tal är primtal?;4;6;7;9;7;MATEMATIK
+Vilket år började andra världskriget?;1938;1939;1940;1941;1939;HISTORIA
+Vem var Sveriges kung 1907?;Gustav V;Oscar II;Karl XII;Gustav III;Gustav V;HISTORIA
+Vilken är Europas största flod?;Seine;Donau;Volga;Rhen;Volga;GEOGRAFI
+Vilket land har flest öar?;Sverige;Finland;Indonesien;Filippinerna;Sverige;GEOGRAFI
+Vilket lag vann fotbolls-VM 2018?;Frankrike;Kroatien;Belgien;Tyskland;Frankrike;SPORT
+I vilken sport används puck?;Fotboll;Basket;Ishockey;Tennis;Ishockey;SPORT
+Vem skrev Hamlet?;Shakespeare;Goethe;Dante;Cervantes;Shakespeare;KULTUR
+Vilken målning är målad av Da Vinci?;Mona Lisa;Stjärnenatt;Skriet;Flicka med pärlörhänge;Mona Lisa;KULTUR
+Vilket grundämne har symbolen O?;Guld;Syre;Väte;Kväve;Syre;VETENSKAP
+Hur många planeter finns i solsystemet?;7;8;9;10;8;VETENSKAP

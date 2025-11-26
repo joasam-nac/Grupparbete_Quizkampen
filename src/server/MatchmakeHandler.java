@@ -1,25 +1,24 @@
 package server;
 
 import client.ClientHandler;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class MatchmakeHandler {
     private final ServerSocket server;
-    private final BlockingQueue<ClientHandler> waitingClients =
-            new LinkedBlockingQueue<>();
-    private final ThemeValidator validator =
-            new ThemeValidator(Set.of("Tema1", "Tema2", "Tema3", "Tema4"));
+    private final BlockingQueue<ClientHandler> waitingClients = new LinkedBlockingQueue<>();
+    private final QuestionRepository questionRepo;
     private final List<Session> activeSessions = new ArrayList<>();
 
-    public MatchmakeHandler(int port) throws IOException {
+    public MatchmakeHandler(int port, String questionsFile) throws IOException {
         server = new ServerSocket(port);
+        questionRepo = new QuestionRepository(questionsFile);
     }
 
     public void start() {
@@ -35,9 +34,7 @@ public class MatchmakeHandler {
                 new Thread(clientHandler).start();
                 waitingClients.add(clientHandler);
             } catch (IOException e) {
-                System.err.println("Fel vid att ta emot klient: " +
-                        e.getMessage());
-                e.printStackTrace(System.err);
+                System.err.println("Error accepting client: " + e.getMessage());
             }
         }
     }
@@ -48,18 +45,14 @@ public class MatchmakeHandler {
                 ClientHandler first = waitingClients.take();
                 ClientHandler second = waitingClients.take();
 
-                Session session = new Session(first, second, validator);
+                Session session = new Session(first, second, questionRepo);
 
                 first.setSession(session);
                 second.setSession(session);
 
                 activeSessions.add(session);
 
-                System.out.println("Session " + session.getId() +
-                        " startades");
-                System.out.println("Aktiva sessioner " +
-                        activeSessions.size());
-
+                System.out.println("Session " + session.getId() + " started");
                 session.start();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -68,9 +61,12 @@ public class MatchmakeHandler {
         }
     }
 
-    static void main() throws IOException {
-        MatchmakeHandler m = new MatchmakeHandler(5000);
+    static void main(String[] args) throws IOException {
+        String questionsFile = args.length > 0 ? args[0] : "questions.txt";
+        int port = 5000;
+
+        MatchmakeHandler m = new MatchmakeHandler(port, questionsFile);
         m.start();
-        System.out.println("Kör server på port 5000");
+        System.out.println("Server running on port " + port);
     }
 }

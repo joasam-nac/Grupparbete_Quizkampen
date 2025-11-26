@@ -1,115 +1,154 @@
 package server;
 
-public class GameController {
-    public enum Turn {
-        FIRST_CHOOSE,
-        SECOND_CHOOSE,
-        FIRST_ANSWER,
-        SECOND_ANSWER,
-        FINISHED
-    }
+import shared.serverProtocol;
 
-    private static final int QUESTIONS_PER_THEME = 3;
-    private static final int THEMES_PER_GAME = 3;
+import java.util.List;
+import shared.Question;
 
-    public GameAction processMessage(
-            SessionState state,
-            boolean fromFirst,
-            String msg,
-            ThemeValidator validator
-    ) {
-        System.out.println("Turn=" + state.turn + " msg=" + msg +
-                " fromFirst=" + fromFirst);
+public record GameController(QuestionRepository questionRepo) {
 
-        return switch (state.turn) {
-            case FIRST_CHOOSE -> {
-                if (fromFirst && validator.isValidTheme(msg)) {
-                    state.currentTheme = msg;
-                    state.questionsAnswered = 0;
-                    state.turn = Turn.SECOND_ANSWER;
-                    yield new GameAction(
-                            GameAction.Type.SEND_TO_SECOND,
-                            String.format(GameMessages.THEME_SELECTED,
-                                    state.currentTheme) +
-                                    GameMessages.ANSWER_QUESTION_1
-                    );
-                }
-                yield invalidChoice(fromFirst);
-            }
-            case SECOND_ANSWER -> {
-                if (!fromFirst && msg.startsWith("SVAR:")) {
-                    state.questionsAnswered++;
-                    if (state.questionsAnswered == QUESTIONS_PER_THEME) {
-                        state.themesPlayed++;
-                        state.turn = Turn.SECOND_CHOOSE;
-                        yield new GameAction(
-                                GameAction.Type.SEND_TO_SECOND,
-                                GameMessages.CHOOSE_OPPONENT_THEME
-                        );
-                    }
-                    yield new GameAction(
-                            GameAction.Type.SEND_TO_SECOND,
-                            String.format(GameMessages.NEXT_QUESTION,
-                                    state.questionsAnswered + 1)
-                    );
-                }
-                yield invalidChoice(fromFirst);
-            }
-            case SECOND_CHOOSE -> {
-                if (!fromFirst && validator.isValidTheme(msg)) {
-                    state.currentTheme = msg;
-                    state.questionsAnswered = 0;
-                    state.turn = Turn.FIRST_ANSWER;
-                    yield new GameAction(
-                            GameAction.Type.SEND_TO_FIRST,
-                            String.format(GameMessages.THEME_SELECTED,
-                                    state.currentTheme) +
-                                    GameMessages.ANSWER_QUESTION_1
-                    );
-                }
-                yield invalidChoice(fromFirst);
-            }
-            case FIRST_ANSWER -> {
-                if (fromFirst && msg.startsWith("SVAR:")) {
-                    state.questionsAnswered++;
-                    if (state.questionsAnswered == QUESTIONS_PER_THEME) {
-                        state.themesPlayed++;
-                        if (state.themesPlayed == THEMES_PER_GAME) {
-                            state.turn = Turn.FINISHED;
-                            yield new GameAction(
-                                    GameAction.Type.GAME_FINISHED,
-                                    null
-                            );
-                        }
-                        state.turn = Turn.FIRST_CHOOSE;
-                        yield new GameAction(
-                                GameAction.Type.SEND_TO_FIRST,
-                                GameMessages.CHOOSE_OPPONENT_THEME
-                        );
-                    }
-                    yield new GameAction(
-                            GameAction.Type.SEND_TO_FIRST,
-                            String.format(GameMessages.NEXT_QUESTION,
-                                    state.questionsAnswered + 1)
-                    );
-                }
-                yield invalidChoice(fromFirst);
-            }
-            default -> GameAction.none();
+    public GameAction processMessage(SessionState state, boolean fromFirst, String msg) {
+        return switch (state.getPhase()) {
+            case FIRST_CHOOSING_THEME -> handleThemeChoice(state, fromFirst, msg, true);
+            case SECOND_CHOOSING_THEME -> handleThemeChoice(state, fromFirst, msg, false);
+            case BOTH_ANSWERING -> handleAnswer(state, fromFirst, msg);
+            case GAME_FINISHED -> GameAction.none();
         };
     }
 
-    private GameAction invalidChoice(boolean fromFirst) {
-        GameAction.Type type = fromFirst
-                ? GameAction.Type.SEND_TO_FIRST
-                : GameAction.Type.SEND_TO_SECOND;
-        return new GameAction(type, GameMessages.INVALID_CHOICE);
+    private GameAction handleThemeChoice(
+            SessionState state, boolean fromFirst, String msg, boolean expectFirst) {
+
+        if (fromFirst != expectFirst) {
+            return notYourTurn(fromFirst);
+        }
+
+        if (!msg.startsWith(serverProtocol.CHOOSE_THEME)) {
+            return invalidMessage(fromFirst);
+        }
+
+        String theme = msg.substring(serverProtocol.CHOOSE_THEME.length());
+        if (!questionRepo.isValidTheme(theme)) {
+            return invalidMessage(fromFirst);
+        }
+
+        List<Question> questions =
+                questionRepo.getQuestions(theme, SessionState.QUESTIONS_PER_ROUND);
+        state.startRound(theme, questions);
+        state.setPhase(SessionState.Phase.BOTH_ANSWERING);
+
+        // skickar tema och första frågan
+        String firstQuestion = state.getCurrentQuestionFor(true).toProtocolString();
+        String secondQuestion = state.getCurrentQuestionFor(false).toProtocolString();
+
+        String messageFirst = serverProtocol.THEME_CHOSEN + theme + "\n" +
+                serverProtocol.QUESTION + firstQuestion;
+        String messageSecond = serverProtocol.THEME_CHOSEN + theme + "\n" +
+                serverProtocol.QUESTION + secondQuestion;
+
+        return GameAction.sendDifferent(messageFirst, messageSecond);
     }
 
-    public static class SessionState {
-        public String currentTheme;
-        public int themesPlayed;
-        public int questionsAnswered;
-        public Turn turn = Turn.FIRST_CHOOSE;
+    private GameAction handleAnswer(SessionState state, boolean fromFirst, String msg) {
+        if (state.hasPlayerFinished(fromFirst)) {
+            return new GameAction(
+                    fromFirst ? GameAction.Type.SEND_TO_FIRST : GameAction.Type.SEND_TO_SECOND,
+                    "ALREADY_FINISHED"
+            );
+        }
+
+        if (!msg.startsWith(serverProtocol.ANSWER)) {
+            return invalidMessage(fromFirst);
+        }
+
+        int answerIndex;
+        try {
+            answerIndex = Integer.parseInt(msg.substring(serverProtocol.ANSWER.length()));
+        } catch (NumberFormatException e) {
+            return invalidMessage(fromFirst);
+        }
+
+        Question current = state.getCurrentQuestionFor(fromFirst);
+        boolean correct = current.isCorrect(answerIndex);
+        state.recordAnswer(fromFirst, correct);
+
+        String result = serverProtocol.RESULT + (correct ? "CORRECT" : "WRONG");
+
+        GameAction.Type target = fromFirst
+                ? GameAction.Type.SEND_TO_FIRST
+                : GameAction.Type.SEND_TO_SECOND;
+
+        state.nextQuestionFor(fromFirst);
+
+        if (!state.hasMoreQuestionsFor(fromFirst)) {
+            if (state.bothPlayersFinished()) {
+                return handleRoundComplete(state, fromFirst, result);
+            } else {
+                return new GameAction(target, result + "\nWAIT_FOR_OPPONENT");
+            }
+        }
+
+        Question nextQ = state.getCurrentQuestionFor(fromFirst);
+        String nextQuestion = serverProtocol.QUESTION + nextQ.toProtocolString();
+
+        return new GameAction(target, result + "\n" + nextQuestion);
+    }
+
+    private GameAction handleRoundComplete(
+            SessionState state, boolean fromFirst, String lastResult) {
+        state.completeRound();
+
+        String roundScore = serverProtocol.ROUND_SCORE + state.getRoundScoreString();
+
+        if (state.isGameFinished()) {
+            state.setPhase(SessionState.Phase.GAME_FINISHED);
+            String gameOver = serverProtocol.GAME_OVER + state.getTotalScoreString();
+
+            String finisherMsg = lastResult + "\n" + roundScore + "\n" + gameOver;
+            String waiterMsg = roundScore + "\n" + gameOver;
+
+            return fromFirst
+                    ? GameAction.sendDifferent(finisherMsg, waiterMsg)
+                    : GameAction.sendDifferent(waiterMsg, finisherMsg);
+        }
+
+        // bestämmer vem som väljer tema
+        boolean firstChoosesNext = state.getRoundsPlayed() % 2 == 0;
+        if (firstChoosesNext) {
+            state.setPhase(SessionState.Phase.FIRST_CHOOSING_THEME);
+        } else {
+            state.setPhase(SessionState.Phase.SECOND_CHOOSING_THEME);
+        }
+
+        String themes = getAvailableThemes();
+
+        // skapar frågorna
+        String baseFirst = (fromFirst ? lastResult + "\n" : "") + roundScore + "\n" + themes;
+        String baseSecond = (fromFirst ? "" : lastResult + "\n") + roundScore + "\n" + themes;
+
+        String msgFirst = baseFirst + "\n" +
+                (firstChoosesNext ? "YOUR_TURN_CHOOSE" : "OPPONENT_CHOOSING");
+        String msgSecond = baseSecond + "\n" +
+                (firstChoosesNext ? "OPPONENT_CHOOSING" : "YOUR_TURN_CHOOSE");
+
+        return GameAction.sendDifferent(msgFirst, msgSecond);
+    }
+
+    public String getAvailableThemes() {
+        return serverProtocol.THEMES_LIST + String.join(",", questionRepo.getThemeNames());
+    }
+
+    private GameAction notYourTurn(boolean fromFirst) {
+        GameAction.Type target = fromFirst
+                ? GameAction.Type.SEND_TO_FIRST
+                : GameAction.Type.SEND_TO_SECOND;
+        return new GameAction(target, "NOT_YOUR_TURN");
+    }
+
+    private GameAction invalidMessage(boolean fromFirst) {
+        GameAction.Type target = fromFirst
+                ? GameAction.Type.SEND_TO_FIRST
+                : GameAction.Type.SEND_TO_SECOND;
+        return new GameAction(target, "INVALID");
     }
 }
