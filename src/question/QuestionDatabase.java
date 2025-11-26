@@ -20,7 +20,6 @@ public class QuestionDatabase {
     private List<Question> readQuestions(Path path) {
         List<Question> questionList = new ArrayList<>();
 
-        // Kolla om filen finns
         if (!Files.exists(path)) {
             System.err.println("Filen finns inte: " + path);
             return questionList;
