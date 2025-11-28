@@ -99,7 +99,7 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onWaitingForOpponent() {
-        waitingPanel.setMessage("Väntar på motståndare...");
+        waitingPanel.setMessage("Väntar på " + opponentName + "...");
         showPanel(WAITING);
     }
 
@@ -150,13 +150,13 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onRoundComplete(int yourScore, int opponentScore) {
-        resultPanel.showRoundResult(yourScore, opponentScore);
+        resultPanel.showRoundResult(yourScore, opponentScore, opponentName);
         showPanel(RESULT);
     }
 
     @Override
     public void onGameOver(int yourScore, int opponentScore) {
-        resultPanel.showGameOver(yourScore, opponentScore);
+        resultPanel.showGameOver(yourScore, opponentScore, opponentName);
         showPanel(RESULT);
     }
 
