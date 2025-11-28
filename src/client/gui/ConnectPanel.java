@@ -75,6 +75,8 @@ public class ConnectPanel extends JPanel {
     public void setConnecting(boolean connecting) {
         connectButton.setEnabled(!connecting);
         nameField.setEnabled(!connecting);
+        hostField.setEnabled(!connecting);
+        portField.setEnabled(!connecting);
         statusLabel.setText(connecting ? "Ansluter..." : " ");
     }
 }

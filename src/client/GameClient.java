@@ -24,7 +24,7 @@ public class GameClient {
         this.listener = listener;
     }
 
-    public void connect(String host, int port) {
+    public void connect(String host, int port, String playerName) {
         new Thread(() -> {
             try {
                 socket = new Socket(host, port);

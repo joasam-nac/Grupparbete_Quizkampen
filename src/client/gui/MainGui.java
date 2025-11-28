@@ -62,8 +62,15 @@ public class MainGui extends JFrame implements GameClientListener {
 
     // Button callbacks
     private void onConnectClicked(String host, int port) {
+        String playerName = connectPanel.getPlayerName();
+
+        if (playerName.isEmpty()) {
+            JOptionPane.showMessageDialog(null , "Varning! Ange ett namn.");
+            return;
+        }
+
         connectPanel.setConnecting(true);
-        client.connect(host, port);
+        client.connect(host, port, playerName);
     }
 
     private void onThemeSelected(String theme) {
