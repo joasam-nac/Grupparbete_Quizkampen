@@ -17,4 +17,5 @@ public interface GameClientListener {
     void onGameOver(int yourScore, int opponentScore);
     void onError(String message);
     void onDisconnected();
+    void onOpponentNameReceived(String name);
 }

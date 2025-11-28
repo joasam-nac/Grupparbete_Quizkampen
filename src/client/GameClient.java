@@ -30,6 +30,7 @@ public class GameClient {
                 socket = new Socket(host, port);
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
+                out.println(playerName);
                 running = true;
 
                 notifyOnEDT(() -> listener.onConnected());

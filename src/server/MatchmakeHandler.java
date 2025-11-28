@@ -30,9 +30,10 @@ public class MatchmakeHandler {
         while (true) {
             try {
                 Socket socket = server.accept();
-                ClientHandler clientHandler = new ClientHandler(socket);
+                // Skicka kön till ClientHandler
+                ClientHandler clientHandler = new ClientHandler(socket, waitingClients);
                 new Thread(clientHandler).start();
-                waitingClients.add(clientHandler);
+
             } catch (IOException e) {
                 System.err.println("Error accepting client: " + e.getMessage());
             }
