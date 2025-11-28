@@ -64,9 +64,14 @@ public class GameClient {
             List<String> themes = Arrays.asList(themesStr.split(","));
             notifyOnEDT(() -> listener.onThemesReceived(themes));
 
+        } else if (msg.startsWith(serverProtocol.OPPONENT_NAME)) {
+            String name = msg.substring(serverProtocol.OPPONENT_NAME.length());
+            notifyOnEDT(() -> listener.onOpponentNameReceived(name));
+
         } else if (msg.equals("YOUR_TURN_CHOOSE")) {
             currentQuestionNumber = 0;
             currentScore = 0;
+
             // person som väljer tema först är spelare 1
             if (!isFirstPlayer && currentQuestionNumber == 0) {
                 isFirstPlayer = true;

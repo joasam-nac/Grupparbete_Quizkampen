@@ -19,6 +19,7 @@ public class MainGui extends JFrame implements GameClientListener {
     private final ThemePanel themePanel;
     private final QuestionPanel questionPanel;
     private final ResultPanel resultPanel;
+    private String opponentName = "Motståndaren";
 
     // namn för CardLayout
     private static final String CONNECT = "connect";
@@ -120,7 +121,7 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onOpponentChoosing() {
-        waitingPanel.setMessage("Motståndaren väljer tema...");
+        waitingPanel.setMessage(opponentName + " väljer tema...");
         showPanel(WAITING);
     }
 
@@ -170,6 +171,16 @@ public class MainGui extends JFrame implements GameClientListener {
         JOptionPane.showMessageDialog(this, "Tappade anslutningen", "Fel",
                 JOptionPane.ERROR_MESSAGE);
         showPanel(CONNECT);
+    }
+
+    @Override
+    public void onOpponentNameReceived(String name) {
+        this.opponentName = name;
+
+        if (waitingPanel.isVisible()) {
+            waitingPanel.setMessage("Spelar mot " + opponentName + " !");
+        }
+
     }
 
     static void main() {
