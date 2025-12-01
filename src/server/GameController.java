@@ -40,8 +40,10 @@ public record GameController(QuestionRepository questionRepo, GameConfig config)
         String secondQuestion = state.getCurrentQuestionFor(false).toProtocolString();
 
         String messageFirst = serverProtocol.THEME_CHOSEN + theme + "\n" +
+                serverProtocol.TOTAL_QUESTIONS + state.getQuestionsPerRound() + "\n" +
                 serverProtocol.QUESTION + firstQuestion;
         String messageSecond = serverProtocol.THEME_CHOSEN + theme + "\n" +
+                serverProtocol.TOTAL_QUESTIONS + state.getQuestionsPerRound() + "\n" +
                 serverProtocol.QUESTION + secondQuestion;
 
         return GameAction.sendDifferent(messageFirst, messageSecond);

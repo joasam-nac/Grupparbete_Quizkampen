@@ -131,8 +131,8 @@ public class MainGui extends JFrame implements GameClientListener {
     }
 
     @Override
-    public void onQuestionReceived(Question question, int questionNumber) {
-        questionPanel.showQuestion(question, questionNumber);
+    public void onQuestionReceived(Question question, int questionNumber, int questionsPerRound) {
+        questionPanel.showQuestion(question, questionNumber, questionsPerRound);
         showPanel(QUESTION);
     }
 
