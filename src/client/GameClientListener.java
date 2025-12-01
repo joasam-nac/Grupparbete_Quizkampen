@@ -11,7 +11,7 @@ public interface GameClientListener {
     void onYourTurnToChoose();
     void onOpponentChoosing();
     void onThemeChosen(String theme);
-    void onQuestionReceived(Question question, int questionNumber);
+    void onQuestionReceived(Question question, int questionNumber, int totalQuestionsPerRound);
     void onAnswerResult(boolean correct, int yourScore);
     void onRoundComplete(int yourScore, int opponentScore);
     void onGameOver(int yourScore, int opponentScore);

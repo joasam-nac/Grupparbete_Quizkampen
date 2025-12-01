@@ -20,6 +20,7 @@ public class GameClient {
     private int currentRoundScore = 0;
     private int totalScore = 0;
     private int opponentTotalScore = 0;
+    private int totalQuestionsPerRound = 0;
 
     private boolean isFirstPlayer = false;
     private boolean roleAssigned = false; // Låser identiteten
@@ -89,7 +90,11 @@ public class GameClient {
             }
             notifyOnEDT(() -> listener.onYourTurnToChoose());
 
-        } else if (msg.equals("OPPONENT_CHOOSING")) {
+        } else if (msg.startsWith(serverProtocol.TOTAL_QUESTIONS)) {
+            totalQuestionsPerRound = Integer.parseInt(msg.substring(
+                    serverProtocol.TOTAL_QUESTIONS.length()));
+        }
+        else if (msg.equals("OPPONENT_CHOOSING")) {
             currentQuestionNumber = 0;
             currentRoundScore = 0;
 
@@ -108,7 +113,8 @@ public class GameClient {
             String questionData = msg.substring(serverProtocol.QUESTION.length());
             Question q = Question.fromProtocolString(questionData);
             currentQuestionNumber++;
-            notifyOnEDT(() -> listener.onQuestionReceived(q, currentQuestionNumber));
+            notifyOnEDT(() -> listener.onQuestionReceived(
+                    q, currentQuestionNumber, totalQuestionsPerRound));
 
         } else if (msg.startsWith(serverProtocol.RESULT)) {
             String[] parts = msg.substring(serverProtocol.RESULT.length()).split(":");

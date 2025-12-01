@@ -120,11 +120,11 @@ public class QuestionPanel extends JPanel {
         themeLabel.setText("Tema: " + theme);
     }
 
-    public void showQuestion(Question question, int questionNumber) {
+    public void showQuestion(Question question, int questionNumber, int totalQuestionsPerRound) {
         this.currentQuestion = question;
         this.selectedAnswer = -1;
 
-        questionNumberLabel.setText("Fråga " + questionNumber);
+        questionNumberLabel.setText("Fråga " + questionNumber + " av " + totalQuestionsPerRound);
         questionTextLabel.setText("<html><center>" + question.text() + "</center></html>");
 
         List<String> alts = question.alternatives();

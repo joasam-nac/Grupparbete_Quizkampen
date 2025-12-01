@@ -16,4 +16,5 @@ public class serverProtocol {
     public static final String ROUND_SCORE = "ROUND_SCORE:";
     public static final String GAME_OVER = "GAME_OVER:";
     public static final String THEMES_LIST = "THEMES:";
+    public static final String TOTAL_QUESTIONS = "TOTAL_QUESTIONS:";
 }
