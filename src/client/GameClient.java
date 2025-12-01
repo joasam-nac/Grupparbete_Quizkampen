@@ -22,6 +22,8 @@ public class GameClient {
     private int opponentTotalScore = 0;
     private boolean isFirstPlayer = false;
 
+    private boolean hasReceivedFirstMessage = false;
+
     public void setListener(GameClientListener listener) {
         this.listener = listener;
     }
@@ -74,14 +76,20 @@ public class GameClient {
             currentQuestionNumber = 0;
             currentRoundScore = 0;
 
-            if (!isFirstPlayer) {
+            if (!hasReceivedFirstMessage) {
                 isFirstPlayer = true;
+                hasReceivedFirstMessage = true;
             }
             notifyOnEDT(() -> listener.onYourTurnToChoose());
 
         } else if (msg.equals("OPPONENT_CHOOSING")) {
             currentQuestionNumber = 0;
             currentRoundScore = 0;
+
+            if (!hasReceivedFirstMessage) {
+                isFirstPlayer = false;
+                hasReceivedFirstMessage = true;
+            }
             notifyOnEDT(() -> listener.onOpponentChoosing());
 
         } else if (msg.startsWith(serverProtocol.THEME_CHOSEN)) {
@@ -147,6 +155,7 @@ public class GameClient {
         String[] parts = scoreStr.split(":");
         int first = Integer.parseInt(parts[0]);
         int second = Integer.parseInt(parts[1]);
+
 
         if (isFirstPlayer) {
             return new int[]{first, second};
