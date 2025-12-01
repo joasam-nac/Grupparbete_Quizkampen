@@ -4,27 +4,29 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.BiConsumer;
 
-public class ConnectPanel extends JPanel {
+public class ConnectPanel extends JPanel implements GuiConstants.ThemeChangeListener {
     private final JTextField hostField = new JTextField("localhost", 15);
     private final JTextField portField = new JTextField("5000", 5);
     private final JTextField nameField = new JTextField("Spelare", 15);
     private final JButton connectButton = new JButton("Anslut");
+    private final JButton colorThemeButton = new JButton("🎨 Färgtema");
     private final JLabel statusLabel = new JLabel(" ");
+    private final JLabel title;
+    private final JPanel formPanel;
 
     public ConnectPanel(BiConsumer<String, Integer> onConnect) {
+        GuiConstants.addThemeChangeListener(this);
+
         setLayout(new BorderLayout());
-        setBackground(GuiConstants.BACKGROUND);
 
         // titel
-        JLabel title = new JLabel("Quizkampen", SwingConstants.CENTER);
+        title = new JLabel("Quizkampen", SwingConstants.CENTER);
         title.setFont(GuiConstants.TITLE_FONT);
-        title.setForeground(GuiConstants.PRIMARY);
-        title.setBorder(BorderFactory.createEmptyBorder(50, 0, 50, 0));
+        title.setBorder(BorderFactory.createEmptyBorder(50, 0, 30, 0));
         add(title, BorderLayout.NORTH);
 
         // formulär
-        JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBackground(GuiConstants.BACKGROUND);
+        formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -46,7 +48,6 @@ public class ConnectPanel extends JPanel {
 
         gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 2;
         connectButton.setFont(GuiConstants.BUTTON_FONT);
-        connectButton.setBackground(GuiConstants.PRIMARY);
         connectButton.setForeground(Color.WHITE);
         connectButton.setPreferredSize(GuiConstants.BUTTON_SIZE);
         formPanel.add(connectButton, gbc);
@@ -57,7 +58,16 @@ public class ConnectPanel extends JPanel {
 
         add(formPanel, BorderLayout.CENTER);
 
-        // knapp
+        // färgtema-knapp
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        colorThemeButton.setFont(GuiConstants.BUTTON_FONT);
+        colorThemeButton.setFocusPainted(false);
+        colorThemeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        colorThemeButton.addActionListener(e -> showColorThemeDialog());
+        bottomPanel.add(colorThemeButton);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // anslut-knapp
         connectButton.addActionListener(_ -> {
             try {
                 int port = Integer.parseInt(portField.getText().trim());
@@ -66,6 +76,102 @@ public class ConnectPanel extends JPanel {
                 statusLabel.setText("Ogiltig port");
             }
         });
+
+        updateColors();
+    }
+
+    private void showColorThemeDialog() {
+        JDialog dialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Välj färgtema", true);
+        dialog.setLayout(new GridLayout(4, 1, 10, 10));
+        dialog.setSize(300, 250);
+        dialog.setLocationRelativeTo(this);
+
+        JButton defaultBtn = createThemeOptionButton(
+                "Standard",
+                new Color(52, 73, 94),
+                new Color(236, 240, 241),
+                () -> {
+                    GuiConstants.applyDefaultTheme();
+                    dialog.dispose();
+                }
+        );
+
+        JButton darkBtn = createThemeOptionButton(
+                "Mörkt tema",
+                new Color(45, 52, 54),
+                new Color(32, 35, 41),
+                () -> {
+                    GuiConstants.applyDarkTheme();
+                    dialog.dispose();
+                }
+        );
+
+        JButton greenBtn = createThemeOptionButton(
+                "Grönt tema",
+                new Color(27, 94, 32),
+                new Color(232, 245, 233),
+                () -> {
+                    GuiConstants.applyGreenTheme();
+                    dialog.dispose();
+                }
+        );
+
+        dialog.add(new JLabel("Välj färgtema:", SwingConstants.CENTER));
+        dialog.add(defaultBtn);
+        dialog.add(darkBtn);
+        dialog.add(greenBtn);
+
+        dialog.setVisible(true);
+    }
+
+    private JButton createThemeOptionButton(String name, Color primary, Color background, Runnable action) {
+        JButton btn = new JButton();
+        btn.setLayout(new BorderLayout(10, 0));
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        btn.setFocusPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        JLabel nameLabel = new JLabel(name);
+        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+
+        JPanel colorPreview = new JPanel(new GridLayout(1, 2, 5, 0));
+        colorPreview.setOpaque(false);
+
+        JPanel primarySwatch = new JPanel();
+        primarySwatch.setBackground(primary);
+        primarySwatch.setPreferredSize(new Dimension(30, 30));
+        primarySwatch.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+
+        JPanel backgroundSwatch = new JPanel();
+        backgroundSwatch.setBackground(background);
+        backgroundSwatch.setPreferredSize(new Dimension(30, 30));
+        backgroundSwatch.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+
+        colorPreview.add(primarySwatch);
+        colorPreview.add(backgroundSwatch);
+
+        btn.add(nameLabel, BorderLayout.WEST);
+        btn.add(colorPreview, BorderLayout.EAST);
+
+        btn.addActionListener(e -> action.run());
+
+        return btn;
+    }
+
+    @Override
+    public void onThemeChanged() {
+        updateColors();
+        revalidate();
+        repaint();
+    }
+
+    private void updateColors() {
+        setBackground(GuiConstants.getBackground());
+        formPanel.setBackground(GuiConstants.getBackground());
+        title.setForeground(GuiConstants.getPrimary());
+        connectButton.setBackground(GuiConstants.getPrimary());
+        colorThemeButton.setBackground(GuiConstants.getBackground());
+        colorThemeButton.setForeground(GuiConstants.getTextDark());
     }
 
     public String getPlayerName() {
@@ -77,6 +183,7 @@ public class ConnectPanel extends JPanel {
         nameField.setEnabled(!connecting);
         hostField.setEnabled(!connecting);
         portField.setEnabled(!connecting);
+        colorThemeButton.setEnabled(!connecting);
         statusLabel.setText(connecting ? "Ansluter..." : " ");
     }
 }

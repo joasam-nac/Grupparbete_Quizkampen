@@ -3,17 +3,18 @@ package client.gui;
 import javax.swing.*;
 import java.awt.*;
 
-public class WaitingPanel extends JPanel {
+public class WaitingPanel extends JPanel implements GuiConstants.ThemeChangeListener {
     private final JLabel messageLabel;
     private final JLabel spinnerLabel;
+    private final JPanel centerPanel;
 
     public WaitingPanel() {
-        setLayout(new BorderLayout());
-        setBackground(GuiConstants.BACKGROUND);
+        GuiConstants.addThemeChangeListener(this);
 
-        JPanel centerPanel = new JPanel();
+        setLayout(new BorderLayout());
+
+        centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBackground(GuiConstants.BACKGROUND);
 
         spinnerLabel = new JLabel("⏳", SwingConstants.CENTER);
         spinnerLabel.setFont(new Font("SansSerif", Font.PLAIN, 48));
@@ -21,7 +22,6 @@ public class WaitingPanel extends JPanel {
 
         messageLabel = new JLabel("Väntar...", SwingConstants.CENTER);
         messageLabel.setFont(GuiConstants.TITLE_FONT);
-        messageLabel.setForeground(GuiConstants.TEXT_DARK);
         messageLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         centerPanel.add(Box.createVerticalGlue());
@@ -38,6 +38,21 @@ public class WaitingPanel extends JPanel {
             spinnerLabel.setText(current.equals("⏳") ? "⌛" : "⏳");
         });
         timer.start();
+
+        updateColors();
+    }
+
+    @Override
+    public void onThemeChanged() {
+        updateColors();
+        revalidate();
+        repaint();
+    }
+
+    private void updateColors() {
+        setBackground(GuiConstants.getBackground());
+        centerPanel.setBackground(GuiConstants.getBackground());
+        messageLabel.setForeground(GuiConstants.getTextDark());
     }
 
     public void setMessage(String message) {

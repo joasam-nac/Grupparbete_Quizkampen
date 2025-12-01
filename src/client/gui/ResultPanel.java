@@ -3,30 +3,31 @@ package client.gui;
 import javax.swing.*;
 import java.awt.*;
 
-public class ResultPanel extends JPanel {
+public class ResultPanel extends JPanel implements GuiConstants.ThemeChangeListener {
     private final JLabel titleLabel;
     private final JLabel scoreLabel;
     private final JLabel messageLabel;
     private final JButton continueButton;
+    private final JPanel centerPanel;
 
     private boolean isGameOver = false;
+    private int currentYourScore = 0;
+    private int currentOpponentScore = 0;
 
     public ResultPanel(Runnable onContinue) {
-        setLayout(new BorderLayout());
-        setBackground(GuiConstants.BACKGROUND);
+        GuiConstants.addThemeChangeListener(this);
 
-        JPanel centerPanel = new JPanel();
+        setLayout(new BorderLayout());
+
+        centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBackground(GuiConstants.BACKGROUND);
 
         titleLabel = new JLabel("Resultat", SwingConstants.CENTER);
         titleLabel.setFont(GuiConstants.TITLE_FONT);
-        titleLabel.setForeground(GuiConstants.PRIMARY);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         scoreLabel = new JLabel("0 - 0", SwingConstants.CENTER);
         scoreLabel.setFont(new Font("SansSerif", Font.BOLD, 48));
-        scoreLabel.setForeground(GuiConstants.TEXT_DARK);
         scoreLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         messageLabel = new JLabel("", SwingConstants.CENTER);
@@ -35,7 +36,6 @@ public class ResultPanel extends JPanel {
 
         continueButton = new JButton("Fortsätt");
         continueButton.setFont(GuiConstants.BUTTON_FONT);
-        continueButton.setBackground(GuiConstants.PRIMARY);
         continueButton.setForeground(Color.WHITE);
         continueButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         continueButton.setMaximumSize(GuiConstants.BUTTON_SIZE);
@@ -58,12 +58,48 @@ public class ResultPanel extends JPanel {
         centerPanel.add(Box.createVerticalGlue());
 
         add(centerPanel, BorderLayout.CENTER);
+        updateColors();
+    }
+
+    @Override
+    public void onThemeChanged() {
+        updateColors();
+        updateScoreColor();
+        revalidate();
+        repaint();
+    }
+
+    private void updateColors() {
+        setBackground(GuiConstants.getBackground());
+        centerPanel.setBackground(GuiConstants.getBackground());
+        titleLabel.setForeground(GuiConstants.getPrimary());
+        continueButton.setBackground(GuiConstants.getPrimary());
+
+        if (!isGameOver) {
+            scoreLabel.setForeground(GuiConstants.getTextDark());
+        }
+    }
+
+    private void updateScoreColor() {
+        if (isGameOver) {
+            if (currentYourScore > currentOpponentScore) {
+                scoreLabel.setForeground(GuiConstants.getCorrect());
+            } else if (currentYourScore < currentOpponentScore) {
+                scoreLabel.setForeground(GuiConstants.getWrong());
+            } else {
+                scoreLabel.setForeground(GuiConstants.getSecondary());
+            }
+        }
     }
 
     public void showRoundResult(int yourScore, int opponentScore, String opponentName) {
         isGameOver = false;
+        currentYourScore = yourScore;
+        currentOpponentScore = opponentScore;
+
         titleLabel.setText("Rundan klar!");
         scoreLabel.setText(yourScore + " - " + opponentScore);
+        scoreLabel.setForeground(GuiConstants.getTextDark());
 
         if (yourScore > opponentScore) {
             messageLabel.setText("Du vann rundan! 🎉");
@@ -78,18 +114,21 @@ public class ResultPanel extends JPanel {
 
     public void showGameOver(int yourScore, int opponentScore, String opponentName) {
         isGameOver = true;
+        currentYourScore = yourScore;
+        currentOpponentScore = opponentScore;
+
         titleLabel.setText("Spelet är slut!");
         scoreLabel.setText(yourScore + " - " + opponentScore);
 
         if (yourScore > opponentScore) {
             messageLabel.setText("Grattis, du vann!");
-            scoreLabel.setForeground(GuiConstants.CORRECT);
+            scoreLabel.setForeground(GuiConstants.getCorrect());
         } else if (yourScore < opponentScore) {
             messageLabel.setText("Tyvärr, " + opponentName + " vann.");
-            scoreLabel.setForeground(GuiConstants.WRONG);
+            scoreLabel.setForeground(GuiConstants.getWrong());
         } else {
             messageLabel.setText("Oavgjort!");
-            scoreLabel.setForeground(GuiConstants.SECONDARY);
+            scoreLabel.setForeground(GuiConstants.getSecondary());
         }
 
         continueButton.setText("Avsluta");
