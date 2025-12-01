@@ -10,7 +10,7 @@ public class Session {
     private final ClientHandler firstClient;
     private final ClientHandler secondClient;
     private final GameController controller;
-    private final SessionState state = new SessionState();
+    private final SessionState state;
 
     private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(2);
@@ -18,11 +18,12 @@ public class Session {
     private ScheduledFuture<?> secondPlayerTimer;
     private volatile boolean isCleanedUp = false;
 
-    public Session(ClientHandler first, ClientHandler second, QuestionRepository repo) {
+    public Session(ClientHandler first, ClientHandler second, QuestionRepository repo, GameConfig config) {
         this.id = NEXT_ID++;
         this.firstClient = first;
         this.secondClient = second;
-        this.controller = new GameController(repo);
+        this.controller = new GameController(repo, config);
+        this.state = new SessionState(config);
     }
 
     public int getId() { return id; }
@@ -51,7 +52,6 @@ public class Session {
         GameAction action = controller.processMessage(state, fromFirst, msg);
         executeAction(action);
 
-        // rensar upp efter spel
         if (state.getPhase() == SessionState.Phase.GAME_FINISHED) {
             scheduler.schedule(this::cleanup, 2, TimeUnit.SECONDS);
         }

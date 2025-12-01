@@ -20,16 +20,21 @@ public class GameClient {
     private int currentRoundScore = 0;
     private int totalScore = 0;
     private int opponentTotalScore = 0;
-    private boolean isFirstPlayer = false;
 
-    // Håll koll på om vi fick första meddelandet
-    private boolean hasReceivedFirstMessage = false;
+    private boolean isFirstPlayer = false;
+    private boolean roleAssigned = false; // Låser identiteten
 
     public void setListener(GameClientListener listener) {
         this.listener = listener;
     }
 
     public void connect(String host, int port, String playerName) {
+        // Återställ variabler inför nytt spel
+        this.isFirstPlayer = false;
+        this.roleAssigned = false;
+        this.totalScore = 0;
+        this.opponentTotalScore = 0;
+
         new Thread(() -> {
             try {
                 socket = new Socket(host, port);
@@ -77,10 +82,10 @@ public class GameClient {
             currentQuestionNumber = 0;
             currentRoundScore = 0;
 
-            // Sätt isFirstPlayer bara FÖRSTA gången vi får ett meddelande
-            if (!hasReceivedFirstMessage) {
+            // Vi bestämmer vem vi är ENDAST första gången
+            if (!roleAssigned) {
                 isFirstPlayer = true;
-                hasReceivedFirstMessage = true;
+                roleAssigned = true;
             }
             notifyOnEDT(() -> listener.onYourTurnToChoose());
 
@@ -88,10 +93,10 @@ public class GameClient {
             currentQuestionNumber = 0;
             currentRoundScore = 0;
 
-            // Sätt isFirstPlayer bara FÖRSTA gången vi får ett meddelande
-            if (!hasReceivedFirstMessage) {
-                isFirstPlayer = false;
-                hasReceivedFirstMessage = true;
+            // Vi bestämmer vem vi är ENDAST första gången
+            if (!roleAssigned) {
+                // isFirstPlayer är redan false, så vi behöver bara låsa det
+                roleAssigned = true;
             }
             notifyOnEDT(() -> listener.onOpponentChoosing());
 
@@ -159,7 +164,6 @@ public class GameClient {
         int first = Integer.parseInt(parts[0]);
         int second = Integer.parseInt(parts[1]);
 
-        // Servern skickar alltid först:andra, vänd om vid behov
         if (isFirstPlayer) {
             return new int[]{first, second};
         } else {
