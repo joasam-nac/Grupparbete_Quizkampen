@@ -13,11 +13,13 @@ public class MatchmakeHandler {
     private final BlockingQueue<ClientHandler> waitingClients =
             new LinkedBlockingQueue<>();
     private final QuestionRepository questionRepo;
+    private final GameConfig config;
     private final List<Session> activeSessions = new ArrayList<>();
 
     public MatchmakeHandler(int port, String questionsFile) throws IOException {
         server = new ServerSocket(port);
         questionRepo = new QuestionRepository(questionsFile);
+        config = new GameConfig();  // Laddar game.properties
     }
 
     public void start() {
@@ -45,7 +47,7 @@ public class MatchmakeHandler {
                 ClientHandler first = waitingClients.take();
                 ClientHandler second = waitingClients.take();
 
-                Session session = new Session(first, second, questionRepo);
+                Session session = new Session(first, second, questionRepo, config);
 
                 first.setSession(session);
                 second.setSession(session);
@@ -69,20 +71,20 @@ public class MatchmakeHandler {
     ) {
         synchronized (activeSessions) {
             if (!activeSessions.remove(session)) {
-                return; // redan snyggt
+                return;
             }
         }
 
         System.out.println("Session " + session.getId() + " ending");
 
-        // visar till spelare
+        // Visar till spelare
         session.notifyDisconnect(disconnectedClient);
 
-        // rensar timer
+        // Rensar timer
         session.cleanup();
     }
 
-    static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
         String questionsFile = args.length > 0 ? args[0] : "questions.txt";
         int port = 5000;
 

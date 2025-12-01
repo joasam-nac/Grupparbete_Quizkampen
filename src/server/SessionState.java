@@ -15,8 +15,9 @@ public class SessionState {
         GAME_FINISHED
     }
 
-    public static final int QUESTIONS_PER_ROUND = 4;
-    public static final int TOTAL_ROUNDS = 3;
+    // Läs från config
+    private final int questionsPerRound;
+    private final int totalRounds;
 
     private Phase phase = Phase.FIRST_CHOOSING_THEME;
     private String currentTheme;
@@ -33,12 +34,20 @@ public class SessionState {
     private int firstPlayerRoundScore;
     private int secondPlayerRoundScore;
 
+    // Konstruktor som tar emot config
+    public SessionState(GameConfig config) {
+        this.questionsPerRound = config.getQuestionsPerRound();
+        this.totalRounds = config.getTotalRounds();
+    }
+
     // Getters
     public Phase getPhase() { return phase; }
     public String getCurrentTheme() { return currentTheme; }
     public int getRoundsPlayed() { return roundsPlayed; }
     public int getFirstPlayerScore() { return firstPlayerScore; }
     public int getSecondPlayerScore() { return secondPlayerScore; }
+    public int getQuestionsPerRound() { return questionsPerRound; }
+    public int getTotalRounds() { return totalRounds; }
 
     public Question getCurrentQuestionFor(boolean isFirstPlayer) {
         int index = isFirstPlayer ? firstPlayerQuestionIndex : secondPlayerQuestionIndex;
@@ -111,7 +120,7 @@ public class SessionState {
     }
 
     public boolean isGameFinished() {
-        return roundsPlayed >= TOTAL_ROUNDS;
+        return roundsPlayed >= totalRounds;
     }
 
     public String getRoundScoreString() {

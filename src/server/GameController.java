@@ -1,11 +1,10 @@
 package server;
 
 import shared.serverProtocol;
-
 import java.util.List;
 import shared.Question;
 
-public record GameController(QuestionRepository questionRepo) {
+public record GameController(QuestionRepository questionRepo, GameConfig config) {
 
     public GameAction processMessage(SessionState state, boolean fromFirst, String msg) {
         return switch (state.getPhase()) {
@@ -33,11 +32,10 @@ public record GameController(QuestionRepository questionRepo) {
         }
 
         List<Question> questions =
-                questionRepo.getQuestions(theme, SessionState.QUESTIONS_PER_ROUND);
+                questionRepo.getQuestions(theme, state.getQuestionsPerRound());
         state.startRound(theme, questions);
         state.setPhase(SessionState.Phase.BOTH_ANSWERING);
 
-        // skickar tema och första frågan
         String firstQuestion = state.getCurrentQuestionFor(true).toProtocolString();
         String secondQuestion = state.getCurrentQuestionFor(false).toProtocolString();
 
@@ -114,7 +112,6 @@ public record GameController(QuestionRepository questionRepo) {
                     : GameAction.sendDifferent(waiterMsg, finisherMsg);
         }
 
-        // bestämmer vem som väljer tema
         boolean firstChoosesNext = state.getRoundsPlayed() % 2 == 0;
         if (firstChoosesNext) {
             state.setPhase(SessionState.Phase.FIRST_CHOOSING_THEME);
@@ -124,7 +121,6 @@ public record GameController(QuestionRepository questionRepo) {
 
         String themes = getAvailableThemes();
 
-        // skapar frågorna
         String baseFirst = (fromFirst ? lastResult + "\n" : "") + roundScore + "\n" + themes;
         String baseSecond = (fromFirst ? "" : lastResult + "\n") + roundScore + "\n" + themes;
 

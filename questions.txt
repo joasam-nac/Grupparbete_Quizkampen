@@ -1,12 +1,30 @@
-Vad är 2+2?;3;4;5;6;4;MATEMATIK
-Vilket tal är primtal?;4;6;7;9;7;MATEMATIK
-Vilket år började andra världskriget?;1938;1939;1940;1941;1939;HISTORIA
-Vem var Sveriges kung 1907?;Gustav V;Oscar II;Karl XII;Gustav III;Gustav V;HISTORIA
-Vilken är Europas största flod?;Seine;Donau;Volga;Rhen;Volga;GEOGRAFI
-Vilket land har flest öar?;Sverige;Finland;Indonesien;Filippinerna;Sverige;GEOGRAFI
-Vilket lag vann fotbolls-VM 2018?;Frankrike;Kroatien;Belgien;Tyskland;Frankrike;SPORT
-I vilken sport används puck?;Fotboll;Basket;Ishockey;Tennis;Ishockey;SPORT
-Vem skrev Hamlet?;Shakespeare;Goethe;Dante;Cervantes;Shakespeare;KULTUR
-Vilken målning är målad av Da Vinci?;Mona Lisa;Stjärnenatt;Skriet;Flicka med pärlörhänge;Mona Lisa;KULTUR
-Vilket grundämne har symbolen O?;Guld;Syre;Väte;Kväve;Syre;VETENSKAP
-Hur många planeter finns i solsystemet?;7;8;9;10;8;VETENSKAP
+Vad är 25 % av 120?;25;30;40;20;30;MATEMATIK
+Vad är 9 × 7?;60;72;63;56;63;MATEMATIK
+Vad är 12²?;144;124;156;132;144;MATEMATIK
+Vad är 5 × 20?;80;50;100;75;100;MATEMATIK
+Hur många sidor har en pentagon?;6;5;4;7;5;MATEMATIK
+Vilket år började andra världskriget?;1940;1938;1939;1941;1939;HISTORIA
+Vem var Sveriges kung 1907?;Oscar II;Karl XII;Gustav III;Gustav V;Gustav V;HISTORIA
+Vilken japansk stad träffades av den första atombomben 1945?;Kyoto;Hiroshima;Tokyo;Seoul;Hiroshima;HISTORIA
+Vem var USA:s första president?;John Adams;Thomas Jefferson;Abraham Lincoln;George Washington;George Washington;HISTORIA
+Vem var Storbritanniens premiärminister under andra världskriget?;Churchill;Blair;Chamberlain;Thatcher;Churchill;HISTORIA
+Vilken är Europas största flod?;Volga;Seine;Donau;Rhen;Volga;GEOGRAFI
+Vilket land har flest öar?;Indonesien;Sverige;Filippinerna;Finland;Sverige;GEOGRAFI
+Vilket land har största befolkningen i världen?;Indien;Kina;USA;Ryssland;Kina;GEOGRAFI
+Vilket berg är högst i världen?;Everest;K2;Denali;Kilimanjaro;Everest;GEOGRAFI
+Vilken ö är störst i världen?;Borneo;Grönland;Madagaskar;Nya Guinea;Grönland;GEOGRAFI
+Vilket lag vann fotbolls-VM 2018?;Belgien;Frankrike;Tyskland;Kroatien;Frankrike;SPORT
+Hur många ringar finns i OS-loggan?;3;6;4;5;5;SPORT
+I vilken sport används puck?;Ishockey;Fotboll;Tennis;Basket;Ishockey;SPORT
+I vilken sport tävlar man i Tour de France?;Löpning;Cykling;Skidor;Rodd;Cykling;SPORT
+Vilket land är känt för cricket?;Indien;Brasilien;USA;Ryssland;Indien;SPORT
+Vem skrev Hamlet?;Goethe;Shakespeare;Cervantes;Dante;Shakespeare;KULTUR
+Vem målade Mona Lisa?;Monet;Da Vinci;Van Gogh;Picasso;Da Vinci;KULTUR
+Vilken musiker kallades ”The King of Pop”?;Michael Jackson;Prince;Stevie Wonder;Elvis Presley;Michael Jackson;KULTUR
+Vilken musikgenre förknippas med Bob Marley?;Jazz;Reggae;Rock;Pop;Reggae;KULTUR
+Vilken superhjälte är känd för sin hammare?;Thor;Batman;Iron Man;Superman;Thor;KULTUR
+Vilket grundämne har symbolen O?;Syre;Kväve;Väte;Guld;Syre;VETENSKAP
+Hur många planeter finns i solsystemet?;8;7;9;10;8;VETENSKAP
+Vilket djur är världens största?;Haj;Blåval;Elefant;Giraff;Blåval;VETENSKAP
+Vilket ämne har kemisk symbol H?;Syre;Väte;Helium;Kväve;Väte;VETENSKAP
+Vilken planet är närmast solen?;Mars;Merkurius;Venus;Jupiter;Merkurius;VETENSKAP

@@ -31,7 +31,6 @@ public class QuestionPanel extends JPanel {
         setBackground(GuiConstants.BACKGROUND);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Timer panel
         JPanel timerPanel = new JPanel(new BorderLayout(5, 5));
         timerPanel.setBackground(GuiConstants.BACKGROUND);
         timerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
@@ -59,7 +58,6 @@ public class QuestionPanel extends JPanel {
         scorePanel.add(scoreLabel);
         timerPanel.add(scorePanel, BorderLayout.SOUTH);
 
-        // Tema och nummer på fråga
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(GuiConstants.BACKGROUND);
 
@@ -67,14 +65,13 @@ public class QuestionPanel extends JPanel {
         themeLabel.setFont(GuiConstants.TEXT_FONT);
         themeLabel.setForeground(GuiConstants.PRIMARY);
 
-        questionNumberLabel = new JLabel("Fråga 1/4");
+        questionNumberLabel = new JLabel("Fråga 1");
         questionNumberLabel.setFont(GuiConstants.TEXT_FONT);
         questionNumberLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
         topPanel.add(themeLabel, BorderLayout.WEST);
         topPanel.add(questionNumberLabel, BorderLayout.EAST);
 
-        // Kombinera timer och top panel
         JPanel headerPanel = new JPanel(new BorderLayout(0, 10));
         headerPanel.setBackground(GuiConstants.BACKGROUND);
         headerPanel.add(timerPanel, BorderLayout.NORTH);
@@ -82,14 +79,12 @@ public class QuestionPanel extends JPanel {
 
         add(headerPanel, BorderLayout.NORTH);
 
-        // Text för fråga
         questionTextLabel = new JLabel("", SwingConstants.CENTER);
         questionTextLabel.setFont(GuiConstants.QUESTION_FONT);
         questionTextLabel.setForeground(GuiConstants.TEXT_DARK);
         questionTextLabel.setBorder(BorderFactory.createEmptyBorder(30, 10, 30, 10));
         add(questionTextLabel, BorderLayout.CENTER);
 
-        // Svarsalternativ
         JPanel answersPanel = new JPanel();
         answersPanel.setLayout(new GridLayout(4, 1, 10, 10));
         answersPanel.setBackground(GuiConstants.BACKGROUND);
@@ -129,7 +124,7 @@ public class QuestionPanel extends JPanel {
         this.currentQuestion = question;
         this.selectedAnswer = -1;
 
-        questionNumberLabel.setText("Fråga " + questionNumber + "/4");
+        questionNumberLabel.setText("Fråga " + questionNumber);
         questionTextLabel.setText("<html><center>" + question.text() + "</center></html>");
 
         List<String> alts = question.alternatives();
@@ -161,14 +156,13 @@ public class QuestionPanel extends JPanel {
     public void showTimeoutResult() {
         stopTimer();
 
-        // visar rätt svar i grönt, allt annat i grått
         for (int i = 0; i < 4; i++) {
             JButton btn = answerButtons.get(i);
 
             if (i == currentQuestion.correctIndex()) {
                 btn.setBackground(GuiConstants.CORRECT);
             } else {
-                btn.setBackground(new Color(255, 200, 200)); // Light red tint
+                btn.setBackground(new Color(255, 200, 200));
             }
             btn.setEnabled(false);
         }
@@ -185,7 +179,6 @@ public class QuestionPanel extends JPanel {
 
             if (timeRemaining <= 0) {
                 stopTimer();
-                // server hanterar timeout
             }
         });
         countdownTimer.start();
@@ -202,14 +195,13 @@ public class QuestionPanel extends JPanel {
         timerLabel.setText("Tid: " + timeRemaining + "s");
         timerBar.setValue(timeRemaining);
 
-        // Ändra färg baserat på tid kvar
         Color color;
         if (timeRemaining <= 5) {
-            color = GuiConstants.WRONG; // Röd
+            color = GuiConstants.WRONG;
         } else if (timeRemaining <= 10) {
-            color = new Color(255, 152, 0); // Orange
+            color = new Color(255, 152, 0);
         } else {
-            color = GuiConstants.PRIMARY; // Grön
+            color = GuiConstants.PRIMARY;
         }
 
         timerLabel.setForeground(color);
