@@ -17,6 +17,8 @@ public class GuiConstants {
     public static final Font TEXT_FONT = new Font("SansSerif", Font.PLAIN, 14);
     public static final Font QUESTION_FONT = new Font("SansSerif", Font.BOLD, 18);
 
+    public static final Font TIMER_FONT = new Font("Arial", Font.BOLD, 20);
+
     // storlek
     public static final int WINDOW_WIDTH = 400;
     public static final int WINDOW_HEIGHT = 600;

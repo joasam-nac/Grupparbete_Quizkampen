@@ -61,12 +61,11 @@ public class MainGui extends JFrame implements GameClientListener {
         cardLayout.show(mainPanel, name);
     }
 
-    // Button callbacks
     private void onConnectClicked(String host, int port) {
         String playerName = connectPanel.getPlayerName();
 
         if (playerName.isEmpty()) {
-            JOptionPane.showMessageDialog(null , "Varning! Ange ett namn.");
+            JOptionPane.showMessageDialog(this, "Varning! Ange ett namn.");
             return;
         }
 
@@ -81,17 +80,18 @@ public class MainGui extends JFrame implements GameClientListener {
     }
 
     private void onAnswerSelected(int answerIndex) {
+        questionPanel.stopTimer();
         questionPanel.setButtonsEnabled(false);
         client.sendAnswer(answerIndex);
     }
 
     private void onContinueClicked() {
-        // Will receive next state from server
+        questionPanel.reset();
         waitingPanel.setMessage("Väntar...");
         showPanel(WAITING);
     }
 
-    // GameClientListener implementation
+    // för GameClientListener
     @Override
     public void onConnected() {
         connectPanel.setConnecting(false);
@@ -99,13 +99,13 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onWaitingForOpponent() {
-        waitingPanel.setMessage("Väntar på " + opponentName + "...");
+        waitingPanel.setMessage("Väntar på motståndare...");
         showPanel(WAITING);
     }
 
     @Override
     public void onOpponentFound() {
-        waitingPanel.setMessage("Motståndare hittad!");
+        waitingPanel.setMessage("Motståndare hittad! Startar spel...");
     }
 
     @Override
@@ -138,24 +138,37 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onAnswerResult(boolean correct, int yourScore) {
+        questionPanel.stopTimer();
         questionPanel.showResult(correct);
+        // server skickar nästa svar eller nästa tema
+    }
 
-        // Brief delay then auto-continue or wait for next question
-        Timer timer = new Timer(1500, _ -> {
-            // Server will send next question or round complete
-        });
-        timer.setRepeats(false);
-        timer.start();
+    @Override
+    public void onTimeout(int currentScore) {
+        questionPanel.stopTimer();
+        questionPanel.showTimeoutResult();
+
+        // visar timeout
+        String originalTitle = getTitle();
+        setTitle("⏱️ Tiden är ute!");
+
+        Timer titleTimer = new Timer(2000, _ -> setTitle(originalTitle));
+        titleTimer.setRepeats(false);
+        titleTimer.start();
+
+        // server skickar själv efter nästa fråga eller nytt tema
     }
 
     @Override
     public void onRoundComplete(int yourScore, int opponentScore) {
+        questionPanel.stopTimer();
         resultPanel.showRoundResult(yourScore, opponentScore, opponentName);
         showPanel(RESULT);
     }
 
     @Override
     public void onGameOver(int yourScore, int opponentScore) {
+        questionPanel.stopTimer();
         resultPanel.showGameOver(yourScore, opponentScore, opponentName);
         showPanel(RESULT);
     }
@@ -168,22 +181,24 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onDisconnected() {
-        JOptionPane.showMessageDialog(this, "Tappade anslutningen", "Fel",
-                JOptionPane.ERROR_MESSAGE);
+        questionPanel.stopTimer();
+        JOptionPane.showMessageDialog(
+                this,
+                "Tappade anslutningen till servern",
+                "Frånkopplad",
+                JOptionPane.ERROR_MESSAGE
+        );
+        questionPanel.reset();
         showPanel(CONNECT);
     }
 
     @Override
     public void onOpponentNameReceived(String name) {
         this.opponentName = name;
-
-        if (waitingPanel.isVisible()) {
-            waitingPanel.setMessage("Spelar mot " + opponentName + " !");
-        }
-
+        waitingPanel.setMessage("Spelar mot " + opponentName + "!");
     }
 
-    static void main() {
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainGui().setVisible(true));
     }
 }

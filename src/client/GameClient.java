@@ -72,7 +72,6 @@ public class GameClient {
             currentQuestionNumber = 0;
             currentScore = 0;
 
-            // person som väljer tema först är spelare 1
             if (!isFirstPlayer && currentQuestionNumber == 0) {
                 isFirstPlayer = true;
             }
@@ -94,8 +93,17 @@ public class GameClient {
         } else if (msg.startsWith(serverProtocol.RESULT)) {
             String result = msg.substring(serverProtocol.RESULT.length());
             boolean correct = result.equals("CORRECT");
+            boolean timeout = result.equals("TIMEOUT");
+
             if (correct) currentScore++;
-            notifyOnEDT(() -> listener.onAnswerResult(correct, currentScore));
+
+            notifyOnEDT(() -> {
+                if (timeout) {
+                    listener.onTimeout(currentScore);
+                } else {
+                    listener.onAnswerResult(correct, currentScore);
+                }
+            });
 
         } else if (msg.startsWith(serverProtocol.ROUND_SCORE)) {
             int[] scores = parseScores(msg.substring(serverProtocol.ROUND_SCORE.length()));
@@ -110,6 +118,12 @@ public class GameClient {
 
         } else if (msg.equals("WAIT_FOR_OPPONENT")) {
             notifyOnEDT(() -> listener.onWaitingForOpponent());
+
+        } else if (msg.equals("OPPONENT_DISCONNECTED")) {
+            notifyOnEDT(() -> {
+                listener.onError("Motståndaren har kopplat från");
+                listener.onDisconnected();
+            });
         }
     }
 
@@ -117,7 +131,7 @@ public class GameClient {
         String[] parts = scoreStr.split(":");
         int first = Integer.parseInt(parts[0]);
         int second = Integer.parseInt(parts[1]);
-        // Return [yourScore, opponentScore]
+
         if (isFirstPlayer) {
             return new int[]{first, second};
         } else {
