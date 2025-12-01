@@ -19,4 +19,5 @@ public interface GameClientListener {
     void onDisconnected();
     void onOpponentNameReceived(String name);
     void onTimeout(int currentScore);
+    void onScoreUpdate(int yourScore, int opponentScore);
 }

@@ -13,6 +13,7 @@ public class QuestionPanel extends JPanel {
     private final JLabel questionTextLabel;
     private final JLabel timerLabel;
     private final JProgressBar timerBar;
+    private final JLabel scoreLabel;
     private final List<JButton> answerButtons = new ArrayList<>();
     private final Consumer<Integer> onAnswerSelected;
 
@@ -35,6 +36,10 @@ public class QuestionPanel extends JPanel {
         timerPanel.setBackground(GuiConstants.BACKGROUND);
         timerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
+        scoreLabel = new JLabel("Du: 0 | Motståndare: 0", SwingConstants.CENTER);
+        scoreLabel.setFont(GuiConstants.TEXT_FONT);
+        scoreLabel.setForeground(GuiConstants.TEXT_DARK);
+
         timerLabel = new JLabel("Tid: 15s", SwingConstants.CENTER);
         timerLabel.setFont(GuiConstants.TITLE_FONT);
         timerLabel.setForeground(GuiConstants.PRIMARY);
@@ -48,6 +53,11 @@ public class QuestionPanel extends JPanel {
 
         timerPanel.add(timerLabel, BorderLayout.NORTH);
         timerPanel.add(timerBar, BorderLayout.CENTER);
+
+        JPanel scorePanel = new JPanel();
+        scorePanel.setBackground(GuiConstants.BACKGROUND);
+        scorePanel.add(scoreLabel);
+        timerPanel.add(scorePanel, BorderLayout.SOUTH);
 
         // Tema och nummer på fråga
         JPanel topPanel = new JPanel(new BorderLayout());
@@ -225,5 +235,9 @@ public class QuestionPanel extends JPanel {
             btn.setBackground(Color.WHITE);
             btn.setEnabled(false);
         });
+    }
+
+    public void updateScores(int yourScore, int opponentScore) {
+        scoreLabel.setText("Du: " + yourScore + " | Motståndare: " + opponentScore);
     }
 }

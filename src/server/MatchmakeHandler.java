@@ -82,7 +82,7 @@ public class MatchmakeHandler {
         session.cleanup();
     }
 
-    public static void main(String[] args) throws IOException {
+    static void main(String[] args) throws IOException {
         String questionsFile = args.length > 0 ? args[0] : "questions.txt";
         int port = 5000;
 

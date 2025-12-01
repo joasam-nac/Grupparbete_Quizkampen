@@ -160,6 +160,11 @@ public class MainGui extends JFrame implements GameClientListener {
     }
 
     @Override
+    public void onScoreUpdate(int yourScore, int opponentScore) {
+        questionPanel.updateScores(yourScore, opponentScore);
+    }
+
+    @Override
     public void onRoundComplete(int yourScore, int opponentScore) {
         questionPanel.stopTimer();
         resultPanel.showRoundResult(yourScore, opponentScore, opponentName);
@@ -198,7 +203,7 @@ public class MainGui extends JFrame implements GameClientListener {
         waitingPanel.setMessage("Spelar mot " + opponentName + "!");
     }
 
-    public static void main(String[] args) {
+    static void main() {
         SwingUtilities.invokeLater(() -> new MainGui().setVisible(true));
     }
 }

@@ -115,7 +115,8 @@ public class Session {
         state.recordAnswer(forFirst, false);
         state.nextQuestionFor(forFirst);
 
-        String result = shared.serverProtocol.RESULT + "TIMEOUT";
+        int opponentScore = state.getScoreFor(!forFirst);
+        String result = shared.serverProtocol.RESULT + "TIMEOUT:" + opponentScore;
         ClientHandler client = forFirst ? firstClient : secondClient;
 
         if (!state.hasMoreQuestionsFor(forFirst)) {

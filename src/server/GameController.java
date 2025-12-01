@@ -72,7 +72,9 @@ public record GameController(QuestionRepository questionRepo) {
         boolean correct = current.isCorrect(answerIndex);
         state.recordAnswer(fromFirst, correct);
 
-        String result = serverProtocol.RESULT + (correct ? "CORRECT" : "WRONG");
+        int opponentScore = state.getScoreFor(!fromFirst);
+        String result = serverProtocol.RESULT + (correct ? "CORRECT" : "WRONG")
+                + ":" + opponentScore;
 
         GameAction.Type target = fromFirst
                 ? GameAction.Type.SEND_TO_FIRST
