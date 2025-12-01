@@ -17,7 +17,9 @@ public class GameClient {
     private volatile boolean running;
 
     private int currentQuestionNumber = 0;
-    private int currentScore = 0;
+    private int currentRoundScore = 0;
+    private int totalScore = 0;
+    private int opponentTotalScore = 0;
     private boolean isFirstPlayer = false;
 
     public void setListener(GameClientListener listener) {
@@ -70,14 +72,16 @@ public class GameClient {
 
         } else if (msg.equals("YOUR_TURN_CHOOSE")) {
             currentQuestionNumber = 0;
-            currentScore = 0;
+            currentRoundScore = 0;
 
-            if (!isFirstPlayer && currentQuestionNumber == 0) {
+            if (!isFirstPlayer) {
                 isFirstPlayer = true;
             }
             notifyOnEDT(() -> listener.onYourTurnToChoose());
 
         } else if (msg.equals("OPPONENT_CHOOSING")) {
+            currentQuestionNumber = 0;
+            currentRoundScore = 0;
             notifyOnEDT(() -> listener.onOpponentChoosing());
 
         } else if (msg.startsWith(serverProtocol.THEME_CHOSEN)) {
@@ -91,23 +95,35 @@ public class GameClient {
             notifyOnEDT(() -> listener.onQuestionReceived(q, currentQuestionNumber));
 
         } else if (msg.startsWith(serverProtocol.RESULT)) {
-            String result = msg.substring(serverProtocol.RESULT.length());
+            String[] parts = msg.substring(serverProtocol.RESULT.length()).split(":");
+            String result = parts[0];
             boolean correct = result.equals("CORRECT");
             boolean timeout = result.equals("TIMEOUT");
 
-            if (correct) currentScore++;
+            if (correct) currentRoundScore++;
+
+            int opponentRoundScore = 0;
+            if (parts.length > 1) {
+                opponentRoundScore = Integer.parseInt(parts[1]);
+            }
+
+            int displayYourScore = totalScore + currentRoundScore;
+            int displayOpponentScore = opponentTotalScore + opponentRoundScore;
 
             notifyOnEDT(() -> {
+                listener.onScoreUpdate(displayYourScore, displayOpponentScore);
                 if (timeout) {
-                    listener.onTimeout(currentScore);
+                    listener.onTimeout(currentRoundScore);
                 } else {
-                    listener.onAnswerResult(correct, currentScore);
+                    listener.onAnswerResult(correct, currentRoundScore);
                 }
             });
 
         } else if (msg.startsWith(serverProtocol.ROUND_SCORE)) {
             int[] scores = parseScores(msg.substring(serverProtocol.ROUND_SCORE.length()));
-            notifyOnEDT(() -> listener.onRoundComplete(scores[0], scores[1]));
+            totalScore += scores[0];
+            opponentTotalScore += scores[1];
+            notifyOnEDT(() -> listener.onRoundComplete(totalScore, opponentTotalScore));
 
         } else if (msg.startsWith(serverProtocol.GAME_OVER)) {
             int[] scores = parseScores(msg.substring(serverProtocol.GAME_OVER.length()));

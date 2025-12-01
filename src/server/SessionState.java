@@ -4,6 +4,10 @@ import shared.Question;
 import java.util.List;
 
 public class SessionState {
+    public int getScoreFor(boolean isFirst) {
+        return isFirst ? firstPlayerRoundScore : secondPlayerRoundScore;
+    }
+
     public enum Phase {
         FIRST_CHOOSING_THEME,
         SECOND_CHOOSING_THEME,
