@@ -1,7 +1,5 @@
 package server;
 
-import client.ClientHandler;
-
 public class Session {
     private static int NEXT_ID = 1;
     private final int id;
