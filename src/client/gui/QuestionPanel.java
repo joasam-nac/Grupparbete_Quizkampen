@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import shared.Question;
 
-public class QuestionPanel extends JPanel {
+public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeListener {
     private final JLabel themeLabel;
     private final JLabel questionNumberLabel;
     private final JLabel questionTextLabel;
@@ -16,6 +16,12 @@ public class QuestionPanel extends JPanel {
     private final JLabel scoreLabel;
     private final List<JButton> answerButtons = new ArrayList<>();
     private final Consumer<Integer> onAnswerSelected;
+
+    private final JPanel timerPanel;
+    private final JPanel scorePanel;
+    private final JPanel topPanel;
+    private final JPanel headerPanel;
+    private final JPanel answersPanel;
 
     private Timer countdownTimer;
     private int timeRemaining;
@@ -26,44 +32,37 @@ public class QuestionPanel extends JPanel {
 
     public QuestionPanel(Consumer<Integer> onAnswerSelected) {
         this.onAnswerSelected = onAnswerSelected;
+        GuiConstants.addThemeChangeListener(this);
 
         setLayout(new BorderLayout(10, 10));
-        setBackground(GuiConstants.BACKGROUND);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JPanel timerPanel = new JPanel(new BorderLayout(5, 5));
-        timerPanel.setBackground(GuiConstants.BACKGROUND);
+        timerPanel = new JPanel(new BorderLayout(5, 5));
         timerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
         scoreLabel = new JLabel("Du: 0 | Motståndare: 0", SwingConstants.CENTER);
         scoreLabel.setFont(GuiConstants.TEXT_FONT);
-        scoreLabel.setForeground(GuiConstants.TEXT_DARK);
 
         timerLabel = new JLabel("Tid: 15s", SwingConstants.CENTER);
         timerLabel.setFont(GuiConstants.TITLE_FONT);
-        timerLabel.setForeground(GuiConstants.PRIMARY);
 
         timerBar = new JProgressBar(0, TOTAL_TIME);
         timerBar.setValue(TOTAL_TIME);
         timerBar.setStringPainted(false);
         timerBar.setPreferredSize(new Dimension(0, 25));
-        timerBar.setForeground(GuiConstants.PRIMARY);
         timerBar.setBackground(Color.LIGHT_GRAY);
 
         timerPanel.add(timerLabel, BorderLayout.NORTH);
         timerPanel.add(timerBar, BorderLayout.CENTER);
 
-        JPanel scorePanel = new JPanel();
-        scorePanel.setBackground(GuiConstants.BACKGROUND);
+        scorePanel = new JPanel();
         scorePanel.add(scoreLabel);
         timerPanel.add(scorePanel, BorderLayout.SOUTH);
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(GuiConstants.BACKGROUND);
+        topPanel = new JPanel(new BorderLayout());
 
         themeLabel = new JLabel("Tema");
         themeLabel.setFont(GuiConstants.TEXT_FONT);
-        themeLabel.setForeground(GuiConstants.PRIMARY);
 
         questionNumberLabel = new JLabel("Fråga 1");
         questionNumberLabel.setFont(GuiConstants.TEXT_FONT);
@@ -72,8 +71,7 @@ public class QuestionPanel extends JPanel {
         topPanel.add(themeLabel, BorderLayout.WEST);
         topPanel.add(questionNumberLabel, BorderLayout.EAST);
 
-        JPanel headerPanel = new JPanel(new BorderLayout(0, 10));
-        headerPanel.setBackground(GuiConstants.BACKGROUND);
+        headerPanel = new JPanel(new BorderLayout(0, 10));
         headerPanel.add(timerPanel, BorderLayout.NORTH);
         headerPanel.add(topPanel, BorderLayout.SOUTH);
 
@@ -81,13 +79,11 @@ public class QuestionPanel extends JPanel {
 
         questionTextLabel = new JLabel("", SwingConstants.CENTER);
         questionTextLabel.setFont(GuiConstants.QUESTION_FONT);
-        questionTextLabel.setForeground(GuiConstants.TEXT_DARK);
         questionTextLabel.setBorder(BorderFactory.createEmptyBorder(30, 10, 30, 10));
         add(questionTextLabel, BorderLayout.CENTER);
 
-        JPanel answersPanel = new JPanel();
+        answersPanel = new JPanel();
         answersPanel.setLayout(new GridLayout(4, 1, 10, 10));
-        answersPanel.setBackground(GuiConstants.BACKGROUND);
 
         for (int i = 0; i < 4; i++) {
             JButton btn = createAnswerButton(i);
@@ -96,13 +92,36 @@ public class QuestionPanel extends JPanel {
         }
 
         add(answersPanel, BorderLayout.SOUTH);
+        updateColors();
+    }
+
+    @Override
+    public void onThemeChanged() {
+        updateColors();
+        revalidate();
+        repaint();
+    }
+
+    private void updateColors() {
+        setBackground(GuiConstants.getBackground());
+        timerPanel.setBackground(GuiConstants.getBackground());
+        scorePanel.setBackground(GuiConstants.getBackground());
+        topPanel.setBackground(GuiConstants.getBackground());
+        headerPanel.setBackground(GuiConstants.getBackground());
+        answersPanel.setBackground(GuiConstants.getBackground());
+
+        scoreLabel.setForeground(GuiConstants.getTextDark());
+        themeLabel.setForeground(GuiConstants.getPrimary());
+        questionTextLabel.setForeground(GuiConstants.getTextDark());
+
+        updateTimerDisplay();
     }
 
     private JButton createAnswerButton(int index) {
         JButton btn = new JButton();
         btn.setFont(GuiConstants.BUTTON_FONT);
         btn.setBackground(Color.WHITE);
-        btn.setForeground(GuiConstants.TEXT_DARK);
+        btn.setForeground(GuiConstants.getTextDark());
         btn.setPreferredSize(new Dimension(300, 45));
         btn.setFocusPainted(false);
 
@@ -145,9 +164,9 @@ public class QuestionPanel extends JPanel {
             JButton btn = answerButtons.get(i);
 
             if (i == currentQuestion.correctIndex()) {
-                btn.setBackground(GuiConstants.CORRECT);
+                btn.setBackground(GuiConstants.getCorrect());
             } else if (i == selectedAnswer && !correct) {
-                btn.setBackground(GuiConstants.WRONG);
+                btn.setBackground(GuiConstants.getWrong());
             }
             btn.setEnabled(false);
         }
@@ -160,7 +179,7 @@ public class QuestionPanel extends JPanel {
             JButton btn = answerButtons.get(i);
 
             if (i == currentQuestion.correctIndex()) {
-                btn.setBackground(GuiConstants.CORRECT);
+                btn.setBackground(GuiConstants.getCorrect());
             } else {
                 btn.setBackground(new Color(255, 200, 200));
             }
@@ -197,11 +216,11 @@ public class QuestionPanel extends JPanel {
 
         Color color;
         if (timeRemaining <= 5) {
-            color = GuiConstants.WRONG;
+            color = GuiConstants.getWrong();
         } else if (timeRemaining <= 10) {
             color = new Color(255, 152, 0);
         } else {
-            color = GuiConstants.PRIMARY;
+            color = GuiConstants.getPrimary();
         }
 
         timerLabel.setForeground(color);
@@ -219,8 +238,8 @@ public class QuestionPanel extends JPanel {
         questionTextLabel.setText("");
         timerLabel.setText("Tid: 15s");
         timerBar.setValue(TOTAL_TIME);
-        timerLabel.setForeground(GuiConstants.PRIMARY);
-        timerBar.setForeground(GuiConstants.PRIMARY);
+        timerLabel.setForeground(GuiConstants.getPrimary());
+        timerBar.setForeground(GuiConstants.getPrimary());
 
         answerButtons.forEach(btn -> {
             btn.setText("");

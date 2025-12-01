@@ -6,30 +6,44 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ThemePanel extends JPanel {
+public class ThemePanel extends JPanel implements GuiConstants.ThemeChangeListener {
     private final JPanel buttonsPanel;
+    private final JLabel title;
     private final List<JButton> themeButtons = new ArrayList<>();
     private final Consumer<String> onThemeSelected;
 
     public ThemePanel(Consumer<String> onThemeSelected) {
         this.onThemeSelected = onThemeSelected;
+        GuiConstants.addThemeChangeListener(this);
 
         setLayout(new BorderLayout());
-        setBackground(GuiConstants.BACKGROUND);
 
-        JLabel title = new JLabel("Välj tema", SwingConstants.CENTER);
+        title = new JLabel("Välj tema", SwingConstants.CENTER);
         title.setFont(GuiConstants.TITLE_FONT);
-        title.setForeground(GuiConstants.PRIMARY);
         title.setBorder(BorderFactory.createEmptyBorder(40, 0, 40, 0));
         add(title, BorderLayout.NORTH);
 
         // knappar
         buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
-        buttonsPanel.setBackground(GuiConstants.BACKGROUND);
         buttonsPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
         add(buttonsPanel, BorderLayout.CENTER);
+        updateColors();
+    }
+
+    @Override
+    public void onThemeChanged() {
+        updateColors();
+        themeButtons.forEach(btn -> btn.setBackground(GuiConstants.getPrimary()));
+        revalidate();
+        repaint();
+    }
+
+    private void updateColors() {
+        setBackground(GuiConstants.getBackground());
+        buttonsPanel.setBackground(GuiConstants.getBackground());
+        title.setForeground(GuiConstants.getPrimary());
     }
 
     public void setThemes(List<String> themes) {
@@ -50,7 +64,7 @@ public class ThemePanel extends JPanel {
     private JButton createThemeButton(String theme) {
         JButton btn = new JButton(theme);
         btn.setFont(GuiConstants.BUTTON_FONT);
-        btn.setBackground(GuiConstants.PRIMARY);
+        btn.setBackground(GuiConstants.getPrimary());
         btn.setForeground(Color.WHITE);
         btn.setMaximumSize(GuiConstants.BUTTON_SIZE);
         btn.setPreferredSize(GuiConstants.BUTTON_SIZE);
