@@ -10,7 +10,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class MatchmakeHandler {
     private final ServerSocket server;
-    private final BlockingQueue<ClientHandler> waitingClients = new LinkedBlockingQueue<>();
+    private final BlockingQueue<ClientHandler> waitingClients =
+            new LinkedBlockingQueue<>();
     private final QuestionRepository questionRepo;
     private final List<Session> activeSessions = new ArrayList<>();
 
@@ -28,8 +29,8 @@ public class MatchmakeHandler {
         while (true) {
             try {
                 Socket socket = server.accept();
-                // Skicka kön till ClientHandler
-                ClientHandler clientHandler = new ClientHandler(socket, waitingClients);
+                ClientHandler clientHandler =
+                        new ClientHandler(socket, waitingClients, this);
                 new Thread(clientHandler).start();
 
             } catch (IOException e) {
@@ -49,7 +50,9 @@ public class MatchmakeHandler {
                 first.setSession(session);
                 second.setSession(session);
 
-                activeSessions.add(session);
+                synchronized (activeSessions) {
+                    activeSessions.add(session);
+                }
 
                 System.out.println("Session " + session.getId() + " started");
                 session.start();
@@ -60,7 +63,26 @@ public class MatchmakeHandler {
         }
     }
 
-    static void main(String[] args) throws IOException {
+    public synchronized void handleSessionEnd(
+            Session session,
+            ClientHandler disconnectedClient
+    ) {
+        synchronized (activeSessions) {
+            if (!activeSessions.remove(session)) {
+                return; // redan snyggt
+            }
+        }
+
+        System.out.println("Session " + session.getId() + " ending");
+
+        // visar till spelare
+        session.notifyDisconnect(disconnectedClient);
+
+        // rensar timer
+        session.cleanup();
+    }
+
+    public static void main(String[] args) throws IOException {
         String questionsFile = args.length > 0 ? args[0] : "questions.txt";
         int port = 5000;
 
