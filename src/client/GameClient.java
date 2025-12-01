@@ -22,6 +22,7 @@ public class GameClient {
     private int opponentTotalScore = 0;
     private boolean isFirstPlayer = false;
 
+    // Håll koll på om vi fick första meddelandet
     private boolean hasReceivedFirstMessage = false;
 
     public void setListener(GameClientListener listener) {
@@ -76,6 +77,7 @@ public class GameClient {
             currentQuestionNumber = 0;
             currentRoundScore = 0;
 
+            // Sätt isFirstPlayer bara FÖRSTA gången vi får ett meddelande
             if (!hasReceivedFirstMessage) {
                 isFirstPlayer = true;
                 hasReceivedFirstMessage = true;
@@ -86,6 +88,7 @@ public class GameClient {
             currentQuestionNumber = 0;
             currentRoundScore = 0;
 
+            // Sätt isFirstPlayer bara FÖRSTA gången vi får ett meddelande
             if (!hasReceivedFirstMessage) {
                 isFirstPlayer = false;
                 hasReceivedFirstMessage = true;
@@ -156,7 +159,7 @@ public class GameClient {
         int first = Integer.parseInt(parts[0]);
         int second = Integer.parseInt(parts[1]);
 
-
+        // Servern skickar alltid först:andra, vänd om vid behov
         if (isFirstPlayer) {
             return new int[]{first, second};
         } else {
