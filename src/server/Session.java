@@ -1,7 +1,5 @@
 package server;
 
-import client.ClientHandler;
-
 public class Session {
     private static int NEXT_ID = 1;
     private final int id;
@@ -22,6 +20,12 @@ public class Session {
 
     public void start() {
         String themes = controller.getAvailableThemes();
+
+        // Skicka motståndarnas namn till varandra
+        firstClient.send(shared.serverProtocol.OPPONENT_NAME + secondClient.getPlayerName());
+        secondClient.send(shared.serverProtocol.OPPONENT_NAME + firstClient.getPlayerName());
+
+        // Starta spelet som vanligt
         firstClient.send(themes);
         firstClient.send("YOUR_TURN_CHOOSE");
         secondClient.send(themes);

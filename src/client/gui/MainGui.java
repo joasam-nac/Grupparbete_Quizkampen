@@ -19,6 +19,7 @@ public class MainGui extends JFrame implements GameClientListener {
     private final ThemePanel themePanel;
     private final QuestionPanel questionPanel;
     private final ResultPanel resultPanel;
+    private String opponentName = "Motståndaren";
 
     // namn för CardLayout
     private static final String CONNECT = "connect";
@@ -62,8 +63,15 @@ public class MainGui extends JFrame implements GameClientListener {
 
     // Button callbacks
     private void onConnectClicked(String host, int port) {
+        String playerName = connectPanel.getPlayerName();
+
+        if (playerName.isEmpty()) {
+            JOptionPane.showMessageDialog(null , "Varning! Ange ett namn.");
+            return;
+        }
+
         connectPanel.setConnecting(true);
-        client.connect(host, port);
+        client.connect(host, port, playerName);
     }
 
     private void onThemeSelected(String theme) {
@@ -91,7 +99,7 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onWaitingForOpponent() {
-        waitingPanel.setMessage("Väntar på motståndare...");
+        waitingPanel.setMessage("Väntar på " + opponentName + "...");
         showPanel(WAITING);
     }
 
@@ -113,7 +121,7 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onOpponentChoosing() {
-        waitingPanel.setMessage("Motståndaren väljer tema...");
+        waitingPanel.setMessage(opponentName + " väljer tema...");
         showPanel(WAITING);
     }
 
@@ -142,13 +150,13 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onRoundComplete(int yourScore, int opponentScore) {
-        resultPanel.showRoundResult(yourScore, opponentScore);
+        resultPanel.showRoundResult(yourScore, opponentScore, opponentName);
         showPanel(RESULT);
     }
 
     @Override
     public void onGameOver(int yourScore, int opponentScore) {
-        resultPanel.showGameOver(yourScore, opponentScore);
+        resultPanel.showGameOver(yourScore, opponentScore, opponentName);
         showPanel(RESULT);
     }
 
@@ -163,6 +171,16 @@ public class MainGui extends JFrame implements GameClientListener {
         JOptionPane.showMessageDialog(this, "Tappade anslutningen", "Fel",
                 JOptionPane.ERROR_MESSAGE);
         showPanel(CONNECT);
+    }
+
+    @Override
+    public void onOpponentNameReceived(String name) {
+        this.opponentName = name;
+
+        if (waitingPanel.isVisible()) {
+            waitingPanel.setMessage("Spelar mot " + opponentName + " !");
+        }
+
     }
 
     static void main() {

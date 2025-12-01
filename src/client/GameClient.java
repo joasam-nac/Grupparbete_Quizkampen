@@ -24,12 +24,13 @@ public class GameClient {
         this.listener = listener;
     }
 
-    public void connect(String host, int port) {
+    public void connect(String host, int port, String playerName) {
         new Thread(() -> {
             try {
                 socket = new Socket(host, port);
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
+                out.println(playerName);
                 running = true;
 
                 notifyOnEDT(() -> listener.onConnected());
@@ -63,9 +64,14 @@ public class GameClient {
             List<String> themes = Arrays.asList(themesStr.split(","));
             notifyOnEDT(() -> listener.onThemesReceived(themes));
 
+        } else if (msg.startsWith(serverProtocol.OPPONENT_NAME)) {
+            String name = msg.substring(serverProtocol.OPPONENT_NAME.length());
+            notifyOnEDT(() -> listener.onOpponentNameReceived(name));
+
         } else if (msg.equals("YOUR_TURN_CHOOSE")) {
             currentQuestionNumber = 0;
             currentScore = 0;
+
             // person som väljer tema först är spelare 1
             if (!isFirstPlayer && currentQuestionNumber == 0) {
                 isFirstPlayer = true;

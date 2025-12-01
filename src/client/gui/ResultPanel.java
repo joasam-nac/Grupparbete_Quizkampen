@@ -60,7 +60,7 @@ public class ResultPanel extends JPanel {
         add(centerPanel, BorderLayout.CENTER);
     }
 
-    public void showRoundResult(int yourScore, int opponentScore) {
+    public void showRoundResult(int yourScore, int opponentScore, String opponentName) {
         isGameOver = false;
         titleLabel.setText("Rundan klar!");
         scoreLabel.setText(yourScore + " - " + opponentScore);
@@ -68,7 +68,7 @@ public class ResultPanel extends JPanel {
         if (yourScore > opponentScore) {
             messageLabel.setText("Du vann rundan! 🎉");
         } else if (yourScore < opponentScore) {
-            messageLabel.setText("Motståndaren vann rundan");
+            messageLabel.setText(opponentName + " vann rundan");
         } else {
             messageLabel.setText("Oavgjort!");
         }
@@ -76,7 +76,7 @@ public class ResultPanel extends JPanel {
         continueButton.setText("Fortsätt");
     }
 
-    public void showGameOver(int yourScore, int opponentScore) {
+    public void showGameOver(int yourScore, int opponentScore, String opponentName) {
         isGameOver = true;
         titleLabel.setText("Spelet är slut!");
         scoreLabel.setText(yourScore + " - " + opponentScore);
@@ -85,7 +85,7 @@ public class ResultPanel extends JPanel {
             messageLabel.setText("Grattis, du vann!");
             scoreLabel.setForeground(GuiConstants.CORRECT);
         } else if (yourScore < opponentScore) {
-            messageLabel.setText("Tyvärr, du förlorade");
+            messageLabel.setText("Tyvärr, " + opponentName + " vann.");
             scoreLabel.setForeground(GuiConstants.WRONG);
         } else {
             messageLabel.setText("Oavgjort!");
