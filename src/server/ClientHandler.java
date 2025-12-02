@@ -63,6 +63,7 @@ public class ClientHandler implements Runnable {
     private void handleMessages() throws IOException {
         String msg;
         while ((msg = in.readLine()) != null) {
+
             if (session != null) {
                 session.handleMessage(this, msg);
             }

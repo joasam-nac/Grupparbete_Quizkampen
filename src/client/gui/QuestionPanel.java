@@ -16,6 +16,8 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
     private final JLabel scoreLabel;
     private final List<JButton> answerButtons = new ArrayList<>();
     private final Consumer<Integer> onAnswerSelected;
+    private final JButton giveUpButton;
+    private final Runnable onGiveUp;
 
     private final JPanel timerPanel;
     private final JPanel scorePanel;
@@ -30,9 +32,10 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
     private int selectedAnswer = -1;
     private Question currentQuestion;
 
-    public QuestionPanel(Consumer<Integer> onAnswerSelected) {
+    public QuestionPanel(Consumer<Integer> onAnswerSelected, Runnable onGiveUp) {
         this.onAnswerSelected = onAnswerSelected;
         GuiConstants.addThemeChangeListener(this);
+        this.onGiveUp = onGiveUp;
 
         // Läs timeout från samma fil som servern använder
         loadTimeoutFromConfig();
@@ -85,8 +88,9 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
         questionTextLabel.setBorder(BorderFactory.createEmptyBorder(30, 10, 30, 10));
         add(questionTextLabel, BorderLayout.CENTER);
 
-        answersPanel = new JPanel();
-        answersPanel.setLayout(new GridLayout(4, 1, 10, 10));
+        JPanel answersPanel = new JPanel();
+        answersPanel.setLayout(new GridLayout(5, 1, 10, 10)); // 5 rader: 4 svar + ge upp
+        answersPanel.setBackground(GuiConstants.BACKGROUND);
 
         for (int i = 0; i < 4; i++) {
             JButton btn = createAnswerButton(i);
@@ -94,6 +98,22 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
             answersPanel.add(btn);
         }
 
+        giveUpButton = new JButton("Ge upp");
+        giveUpButton.setFont(GuiConstants.BUTTON_FONT);
+        giveUpButton.setBackground(GuiConstants.WRONG);
+        giveUpButton.setForeground(Color.BLACK);
+        giveUpButton.setFocusPainted(false);
+        giveUpButton.setEnabled(false);
+
+        giveUpButton.addActionListener(_ -> {
+            stopTimer();
+            setButtonsEnabled(false);
+            if (onGiveUp != null) {
+                onGiveUp.run();
+            }
+        });
+
+        answersPanel.add(giveUpButton);
         add(answersPanel, BorderLayout.SOUTH);
         updateColors();
     }
@@ -167,7 +187,11 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
             btn.setBackground(Color.WHITE);
             btn.setEnabled(true);
         }
-
+        giveUpButton.setEnabled(true);
+        giveUpButton.setText("Ge upp");
+        giveUpButton.setBackground(GuiConstants.WRONG);
+        giveUpButton.setForeground(Color.BLACK);
+        giveUpButton.setEnabled(true);
         startTimer();
     }
 
@@ -184,6 +208,7 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
             }
             btn.setEnabled(false);
         }
+        giveUpButton.setEnabled(false);
     }
 
     public void showTimeoutResult() {
@@ -199,6 +224,7 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
             }
             btn.setEnabled(false);
         }
+        giveUpButton.setEnabled(false);
     }
 
     private void startTimer() {
@@ -243,6 +269,7 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
 
     public void setButtonsEnabled(boolean enabled) {
         answerButtons.forEach(b -> b.setEnabled(enabled));
+        giveUpButton.setEnabled(enabled);
     }
 
     public void reset() {
@@ -260,6 +287,7 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
             btn.setBackground(Color.WHITE);
             btn.setEnabled(false);
         });
+        giveUpButton.setEnabled(false);
     }
 
     public void updateScores(int yourScore, int opponentScore) {

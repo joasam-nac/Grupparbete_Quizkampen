@@ -37,7 +37,7 @@ public class MainGui extends JFrame implements GameClientListener {
         connectPanel = new ConnectPanel(this::onConnectClicked);
         waitingPanel = new WaitingPanel();
         themePanel = new ThemePanel(this::onThemeSelected);
-        questionPanel = new QuestionPanel(this::onAnswerSelected);
+        questionPanel = new QuestionPanel(this::onAnswerSelected, this::onGiveUpClicked);
         resultPanel = new ResultPanel(this::onContinueClicked);
 
         // lägger till paneler
@@ -91,6 +91,11 @@ public class MainGui extends JFrame implements GameClientListener {
         showPanel(WAITING);
     }
 
+    private void onGiveUpClicked() {
+        questionPanel.stopTimer();
+        questionPanel.setButtonsEnabled(false);
+        client.giveUp();   // skickar GIVE_UP till servern
+    }
     // för GameClientListener
     @Override
     public void onConnected() {

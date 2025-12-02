@@ -202,6 +202,19 @@ public class GameClient {
         } catch (IOException ignored) {}
     }
 
+    public void giveUp() {
+        send(serverProtocol.GIVE_UP);
+
+        disconnect();
+
+        notifyOnEDT(() -> {
+            if (listener != null) {
+                listener.onDisconnected();
+            }
+        });
+    }
+
+
     private void notifyOnEDT(Runnable action) {
         SwingUtilities.invokeLater(action);
     }
