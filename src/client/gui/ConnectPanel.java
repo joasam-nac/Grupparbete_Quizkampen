@@ -6,7 +6,7 @@ import java.util.function.BiConsumer;
 
 public class ConnectPanel extends JPanel implements GuiConstants.ThemeChangeListener {
     private final JTextField hostField = new JTextField("localhost", 15);
-    private final JTextField portField = new JTextField("5000", 5);
+    private final JTextField portField = new JTextField("5074", 5);
     private final JTextField nameField = new JTextField("Spelare", 15);
     private final JButton connectButton = new JButton("Anslut");
     private final JButton colorThemeButton = new JButton("🎨 Färgtema");
