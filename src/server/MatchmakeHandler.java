@@ -86,7 +86,7 @@ public class MatchmakeHandler {
 
     public static void main(String[] args) throws IOException {
         String questionsFile = args.length > 0 ? args[0] : "questions.txt";
-        int port = 5001;
+        int port = 5000;
 
         MatchmakeHandler m = new MatchmakeHandler(port, questionsFile);
         m.start();

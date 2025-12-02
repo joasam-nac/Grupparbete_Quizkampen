@@ -6,7 +6,7 @@ import java.util.function.BiConsumer;
 
 public class ConnectPanel extends JPanel {
     private final JTextField hostField = new JTextField("localhost", 15);
-    private final JTextField portField = new JTextField("5001", 5);
+    private final JTextField portField = new JTextField("5000", 5);
     private final JTextField nameField = new JTextField("Spelare", 15);
     private final JButton connectButton = new JButton("Anslut");
     private final JLabel statusLabel = new JLabel(" ");
