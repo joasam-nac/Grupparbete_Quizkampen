@@ -4,7 +4,7 @@ import java.util.concurrent.*;
 
 public class Session {
     private static int NEXT_ID = 1;
-    private static final int ANSWER_TIMEOUT_SECONDS = 15;
+    private final int answerTimeoutSeconds;
 
     private final int id;
     private final ClientHandler firstClient;
@@ -24,6 +24,7 @@ public class Session {
         this.secondClient = second;
         this.controller = new GameController(repo, config);
         this.state = new SessionState(config);
+        this.answerTimeoutSeconds = config.getAnswerTimeout();
     }
 
     public int getId() { return id; }
@@ -95,7 +96,7 @@ public class Session {
 
             ScheduledFuture<?> timer = scheduler.schedule(
                     () -> handleTimeout(forFirst),
-                    ANSWER_TIMEOUT_SECONDS,
+                     answerTimeoutSeconds,
                     TimeUnit.SECONDS
             );
 

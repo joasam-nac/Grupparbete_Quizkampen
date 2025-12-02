@@ -25,7 +25,7 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
 
     private Timer countdownTimer;
     private int timeRemaining;
-    private static final int TOTAL_TIME = 15;
+    private int TOTAL_TIME = 15; // Default om filen inte finns
 
     private int selectedAnswer = -1;
     private Question currentQuestion;
@@ -33,6 +33,9 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
     public QuestionPanel(Consumer<Integer> onAnswerSelected) {
         this.onAnswerSelected = onAnswerSelected;
         GuiConstants.addThemeChangeListener(this);
+
+        // Läs timeout från samma fil som servern använder
+        loadTimeoutFromConfig();
 
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -43,7 +46,7 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
         scoreLabel = new JLabel("Du: 0 | Motståndare: 0", SwingConstants.CENTER);
         scoreLabel.setFont(GuiConstants.TEXT_FONT);
 
-        timerLabel = new JLabel("Tid: 15s", SwingConstants.CENTER);
+        timerLabel = new JLabel("Tid: " + TOTAL_TIME + "s", SwingConstants.CENTER);
         timerLabel.setFont(GuiConstants.TITLE_FONT);
 
         timerBar = new JProgressBar(0, TOTAL_TIME);
@@ -93,6 +96,17 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
 
         add(answersPanel, BorderLayout.SOUTH);
         updateColors();
+    }
+
+    private void loadTimeoutFromConfig() {
+        try {
+            java.util.Properties props = new java.util.Properties();
+            props.load(new java.io.FileInputStream("game.properties"));
+            TOTAL_TIME = Integer.parseInt(props.getProperty("answer.timeout"));
+            System.out.println("Klient använder timeout: " + TOTAL_TIME + "s");
+        } catch (Exception e) {
+            System.out.println("Kunde inte läsa timeout, använder default: 15s");
+        }
     }
 
     @Override
@@ -236,7 +250,7 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
         selectedAnswer = -1;
         currentQuestion = null;
         questionTextLabel.setText("");
-        timerLabel.setText("Tid: 15s");
+        timerLabel.setText("Tid: " + TOTAL_TIME + "s");
         timerBar.setValue(TOTAL_TIME);
         timerLabel.setForeground(GuiConstants.getPrimary());
         timerBar.setForeground(GuiConstants.getPrimary());
