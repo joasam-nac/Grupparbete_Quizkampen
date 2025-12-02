@@ -104,7 +104,7 @@ public class MainGui extends JFrame implements GameClientListener {
 
     @Override
     public void onWaitingForOpponent() {
-        waitingPanel.setMessage("Väntar på motståndare...");
+        waitingPanel.setMessage("Väntar på " + opponentName + "...");
         showPanel(WAITING);
     }
 

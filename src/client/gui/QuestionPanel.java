@@ -88,9 +88,9 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
         questionTextLabel.setBorder(BorderFactory.createEmptyBorder(30, 10, 30, 10));
         add(questionTextLabel, BorderLayout.CENTER);
 
-        JPanel answersPanel = new JPanel();
+        answersPanel = new JPanel();
         answersPanel.setLayout(new GridLayout(5, 1, 10, 10)); // 5 rader: 4 svar + ge upp
-        answersPanel.setBackground(GuiConstants.BACKGROUND);
+        answersPanel.setBackground(GuiConstants.getBackground());
 
         for (int i = 0; i < 4; i++) {
             JButton btn = createAnswerButton(i);
@@ -100,7 +100,7 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
 
         giveUpButton = new JButton("Ge upp");
         giveUpButton.setFont(GuiConstants.BUTTON_FONT);
-        giveUpButton.setBackground(GuiConstants.WRONG);
+        giveUpButton.setBackground(GuiConstants.getWrong());
         giveUpButton.setForeground(Color.BLACK);
         giveUpButton.setFocusPainted(false);
         giveUpButton.setEnabled(false);
@@ -189,7 +189,7 @@ public class QuestionPanel extends JPanel implements GuiConstants.ThemeChangeLis
         }
         giveUpButton.setEnabled(true);
         giveUpButton.setText("Ge upp");
-        giveUpButton.setBackground(GuiConstants.WRONG);
+        giveUpButton.setBackground(GuiConstants.getWrong());
         giveUpButton.setForeground(Color.BLACK);
         giveUpButton.setEnabled(true);
         startTimer();

@@ -125,9 +125,14 @@ public class GameClient {
             if (correct) {
                 currentRoundScore++;
             }
-            int displayYourScore = totalScore + currentRoundScore;
 
-            int displayOpponentScore = opponentTotalScore;
+            int opponentRoundScore = 0;
+            if (parts.length > 1) {
+                opponentRoundScore = Integer.parseInt(parts[1]);
+            }
+
+            int displayYourScore = totalScore + currentRoundScore;
+            int displayOpponentScore = opponentTotalScore + opponentRoundScore;
 
             notifyOnEDT(() -> {
                 listener.onScoreUpdate(displayYourScore, displayOpponentScore);
