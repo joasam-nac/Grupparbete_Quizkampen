@@ -122,18 +122,16 @@ public class GameClient {
             boolean correct = result.equals("CORRECT");
             boolean timeout = result.equals("TIMEOUT");
 
-            if (correct) currentRoundScore++;
-
-            int opponentRoundScore = 0;
-            if (parts.length > 1) {
-                opponentRoundScore = Integer.parseInt(parts[1]);
+            if (correct) {
+                currentRoundScore++;
             }
-
             int displayYourScore = totalScore + currentRoundScore;
-            int displayOpponentScore = opponentTotalScore + opponentRoundScore;
+
+            int displayOpponentScore = opponentTotalScore;
 
             notifyOnEDT(() -> {
                 listener.onScoreUpdate(displayYourScore, displayOpponentScore);
+
                 if (timeout) {
                     listener.onTimeout(currentRoundScore);
                 } else {
@@ -141,6 +139,11 @@ public class GameClient {
                 }
             });
 
+        } else if (msg.startsWith(serverProtocol.ROUND_SCORE)) {
+            int[] scores = parseScores(msg.substring(serverProtocol.ROUND_SCORE.length()));
+            totalScore += scores[0];
+            opponentTotalScore += scores[1];
+            notifyOnEDT(() -> listener.onRoundComplete(totalScore, opponentTotalScore));
         } else if (msg.startsWith(serverProtocol.ROUND_SCORE)) {
             int[] scores = parseScores(msg.substring(serverProtocol.ROUND_SCORE.length()));
             totalScore += scores[0];
