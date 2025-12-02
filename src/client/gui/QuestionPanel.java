@@ -16,6 +16,8 @@ public class QuestionPanel extends JPanel {
     private final JLabel scoreLabel;
     private final List<JButton> answerButtons = new ArrayList<>();
     private final Consumer<Integer> onAnswerSelected;
+    private final JButton giveUpButton;
+    private final Runnable onGiveUp;
 
     private Timer countdownTimer;
     private int timeRemaining;
@@ -24,8 +26,9 @@ public class QuestionPanel extends JPanel {
     private int selectedAnswer = -1;
     private Question currentQuestion;
 
-    public QuestionPanel(Consumer<Integer> onAnswerSelected) {
+    public QuestionPanel(Consumer<Integer> onAnswerSelected, Runnable onGiveUp) {
         this.onAnswerSelected = onAnswerSelected;
+        this.onGiveUp = onGiveUp;
 
         setLayout(new BorderLayout(10, 10));
         setBackground(GuiConstants.BACKGROUND);
@@ -86,7 +89,7 @@ public class QuestionPanel extends JPanel {
         add(questionTextLabel, BorderLayout.CENTER);
 
         JPanel answersPanel = new JPanel();
-        answersPanel.setLayout(new GridLayout(4, 1, 10, 10));
+        answersPanel.setLayout(new GridLayout(5, 1, 10, 10)); // 5 rader: 4 svar + ge upp
         answersPanel.setBackground(GuiConstants.BACKGROUND);
 
         for (int i = 0; i < 4; i++) {
@@ -95,6 +98,22 @@ public class QuestionPanel extends JPanel {
             answersPanel.add(btn);
         }
 
+        giveUpButton = new JButton("Ge upp");
+        giveUpButton.setFont(GuiConstants.BUTTON_FONT);
+        giveUpButton.setBackground(GuiConstants.WRONG);
+        giveUpButton.setForeground(Color.BLACK);
+        giveUpButton.setFocusPainted(false);
+        giveUpButton.setEnabled(false);
+
+        giveUpButton.addActionListener(_ -> {
+            stopTimer();
+            setButtonsEnabled(false);
+            if (onGiveUp != null) {
+                onGiveUp.run();
+            }
+        });
+
+        answersPanel.add(giveUpButton);
         add(answersPanel, BorderLayout.SOUTH);
     }
 
@@ -134,7 +153,11 @@ public class QuestionPanel extends JPanel {
             btn.setBackground(Color.WHITE);
             btn.setEnabled(true);
         }
-
+        giveUpButton.setEnabled(true);
+        giveUpButton.setText("Ge upp");
+        giveUpButton.setBackground(GuiConstants.WRONG);
+        giveUpButton.setForeground(Color.BLACK);
+        giveUpButton.setEnabled(true);
         startTimer();
     }
 
@@ -151,6 +174,7 @@ public class QuestionPanel extends JPanel {
             }
             btn.setEnabled(false);
         }
+        giveUpButton.setEnabled(false);
     }
 
     public void showTimeoutResult() {
@@ -166,6 +190,7 @@ public class QuestionPanel extends JPanel {
             }
             btn.setEnabled(false);
         }
+        giveUpButton.setEnabled(false);
     }
 
     private void startTimer() {
@@ -210,6 +235,7 @@ public class QuestionPanel extends JPanel {
 
     public void setButtonsEnabled(boolean enabled) {
         answerButtons.forEach(b -> b.setEnabled(enabled));
+        giveUpButton.setEnabled(enabled);
     }
 
     public void reset() {
@@ -227,6 +253,7 @@ public class QuestionPanel extends JPanel {
             btn.setBackground(Color.WHITE);
             btn.setEnabled(false);
         });
+        giveUpButton.setEnabled(false);
     }
 
     public void updateScores(int yourScore, int opponentScore) {

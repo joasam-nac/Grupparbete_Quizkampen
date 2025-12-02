@@ -157,6 +157,27 @@ public class Session {
         }
     }
 
+    //  ny metod, spelare ger upp
+    public synchronized void playerGaveUp(ClientHandler quitter) {
+        if (isCleanedUp) {
+            return;
+        }
+
+        ClientHandler winner = (quitter == firstClient) ? secondClient : firstClient;
+
+        state.setPhase(SessionState.Phase.GAME_FINISHED);
+
+        try {
+            winner.send("OPPONENT_GAVE_UP");
+
+            quitter.send("YOU_GAVE_UP");
+        } catch (Exception e) {
+            System.err.println("Kunde inte skicka ge-upp-meddelande: " + e.getMessage());
+        }
+
+        cleanup();
+    }
+
     public synchronized void cleanup() {
         if (isCleanedUp) {
             return;
